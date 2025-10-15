@@ -1,291 +1,917 @@
-import React from 'react';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-
-const OncologyAnalysis = () => {
-  // Actual data from analysis
-  const metrics = [
-    { label: "Average Monthly wRVU", pre: 608, post: 550, current: 374, unit: "wRVU" },
-    { label: "Average Patient Encounters Per Provider", pre: 2.8, post: 2.6, current: 2.4, unit: "encounters" },
-    { label: "Average Monthly Patient Encounters", pre: 150, post: 145, current: 135, unit: "encounters" },
-    { label: "Average wRVU Per Encounter", pre: 4.1, post: 3.8, current: 2.8, unit: "wRVU" },
-    { label: "Average Monthly FTE", pre: 0.92, post: 0.90, current: 0.85, unit: "FTE" },
-    { label: "Average Patients Seen Per Day", pre: 12, post: 11, current: 10, unit: "patients" },
-    { label: "Average wRVU Per Schedulable Hour", pre: 5.2, post: 4.8, current: 3.8, unit: "wRVU/hr" },
-    { label: "Average Days To Chart Closure", pre: 8.2, post: 6.5, current: 4.2, unit: "days" }
-  ];
-
-  const getChartData = (metric) => [
-    { name: 'Pre-Live', value: metric.pre, fill: '#9CA3AF' },
-    { name: 'With Live', value: metric.post, fill: '#3B82F6' },
-    { name: 'Aug 2025', value: metric.current, fill: '#60A5FA' }
-  ];
-
-  return (
-    <div className="w-full min-h-screen bg-gray-50 p-8">
-      <div className="max-w-7xl mx-auto">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Oncology Augmedix Live Performance Analysis</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
         
-        {/* Header */}
-        <div className="flex items-center justify-between mb-6">
-          <h1 className="text-3xl font-bold text-gray-900">Summary of all metrics</h1>
-          <div className="flex items-center gap-2">
-            <svg className="w-8 h-8 text-blue-500" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #f9fafb;
+            padding: 2rem;
+            color: #111827;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+        
+        .header h1 {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #111827;
+        }
+        
+        .header svg {
+            width: 2rem;
+            height: 2rem;
+            fill: #3b82f6;
+        }
+        
+        .alert-text {
+            color: #dc2626;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            font-size: 0.95rem;
+        }
+        
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+        
+        .metric-card {
+            background: white;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            border: 1px solid #e5e7eb;
+        }
+        
+        .metric-title {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #374151;
+            margin-bottom: 1rem;
+            min-height: 3rem;
+        }
+        
+        .chart-container {
+            margin-bottom: 0.75rem;
+        }
+        
+        .chart-bars {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-around;
+            height: 120px;
+            border-bottom: 1px solid #e5e7eb;
+            padding: 0.5rem 0;
+        }
+        
+        .bar-group {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .bar {
+            width: 40px;
+            background: linear-gradient(to top, #3b82f6, #60a5fa);
+            border-radius: 4px 4px 0 0;
+            transition: all 0.3s;
+        }
+        
+        .bar:hover {
+            opacity: 0.8;
+        }
+        
+        .bar.baseline {
+            background: linear-gradient(to top, #9ca3af, #d1d5db);
+        }
+        
+        .bar-label {
+            font-size: 0.625rem;
+            color: #6b7280;
+            margin-top: 0.25rem;
+            text-align: center;
+        }
+        
+        .metric-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 0.5rem;
+        }
+        
+        .metric-values {
+            font-size: 0.75rem;
+            color: #6b7280;
+        }
+        
+        .metric-change {
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+        
+        .positive { color: #16a34a; }
+        .negative { color: #dc2626; }
+        
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 1.5rem;
+        }
+        
+        .impact-box {
+            background: linear-gradient(135deg, #111827 0%, #1f2937 100%);
+            color: white;
+            border-radius: 0.5rem;
+            padding: 2rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .impact-box h2 {
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .big-stat {
+            margin-bottom: 2rem;
+        }
+        
+        .big-number {
+            font-size: 3rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+        
+        .big-number.red { color: #f87171; }
+        
+        .big-label {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+        
+        .big-sublabel {
+            font-size: 0.875rem;
+            color: #9ca3af;
+        }
+        
+        .divider {
+            border-top: 1px solid #374151;
+            padding-top: 1.5rem;
+            margin-top: 1.5rem;
+        }
+        
+        .quote {
+            font-size: 0.875rem;
+            color: #d1d5db;
+            font-style: italic;
+            margin-bottom: 1rem;
+            line-height: 1.5;
+        }
+        
+        .quote-author {
+            font-size: 0.75rem;
+            color: #6b7280;
+        }
+        
+        .critical-box {
+            background: rgba(127, 29, 29, 0.3);
+            border: 1px solid #991b1b;
+            border-radius: 0.375rem;
+            padding: 0.75rem;
+            margin-top: 1.5rem;
+        }
+        
+        .critical-label {
+            font-size: 0.75rem;
+            color: #fca5a5;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+        
+        .critical-text {
+            font-size: 0.75rem;
+            color: #fecaca;
+        }
+        
+        .right-column {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+        
+        .alert-boxes {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+        
+        .alert-box {
+            background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+            color: white;
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .alert-box.orange {
+            background: linear-gradient(135deg, #ea580c 0%, #c2410c 100%);
+        }
+        
+        .alert-box h3 {
+            font-size: 1.125rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .alert-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 0.25rem;
+        }
+        
+        .alert-desc {
+            font-size: 0.875rem;
+            opacity: 0.9;
+        }
+        
+        .alert-detail {
+            font-size: 0.75rem;
+            opacity: 0.75;
+            margin-top: 0.5rem;
+        }
+        
+        .performance-table {
+            background: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            border: 1px solid #e5e7eb;
+            overflow: hidden;
+        }
+        
+        .table-header {
+            background: #f9fafb;
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        
+        .table-header h3 {
+            font-size: 1.125rem;
+            font-weight: 600;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        thead {
+            background: #f9fafb;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        
+        th {
+            padding: 0.75rem 1.5rem;
+            text-align: left;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #6b7280;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        th.right { text-align: right; }
+        
+        td {
+            padding: 1rem 1.5rem;
+            font-size: 0.875rem;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        
+        td.right { text-align: right; }
+        
+        tr:hover {
+            background: #f9fafb;
+        }
+        
+        .highlight-row {
+            background: #dbeafe !important;
+        }
+        
+        .total-row {
+            background: #f3f4f6 !important;
+            font-weight: 600;
+        }
+        
+        .table-footer {
+            background: #fef2f2;
+            padding: 1rem 1.5rem;
+            border-top: 1px solid #fecaca;
+        }
+        
+        .footer-alert {
+            display: flex;
+            gap: 0.5rem;
+            font-size: 0.75rem;
+            color: #991b1b;
+        }
+        
+        .footer-alert svg {
+            width: 1rem;
+            height: 1rem;
+            flex-shrink: 0;
+            margin-top: 0.125rem;
+            fill: #dc2626;
+        }
+        
+        .action-boxes {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+        
+        .action-box {
+            border-radius: 0.5rem;
+            padding: 1rem;
+            border: 1px solid;
+        }
+        
+        .action-box.red {
+            background: #fef2f2;
+            border-color: #fca5a5;
+        }
+        
+        .action-box.green {
+            background: #f0fdf4;
+            border-color: #86efac;
+        }
+        
+        .action-header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+        
+        .action-header.red { color: #991b1b; }
+        .action-header.green { color: #166534; }
+        
+        .action-header svg {
+            width: 1.25rem;
+            height: 1.25rem;
+        }
+        
+        .action-list {
+            font-size: 0.75rem;
+            line-height: 1.5;
+        }
+        
+        .action-list.red { color: #991b1b; }
+        .action-list.green { color: #166534; }
+        
+        .provider-breakdown {
+            background: white;
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            border: 1px solid #e5e7eb;
+            margin-top: 2rem;
+        }
+        
+        .provider-breakdown h3 {
+            font-size: 1.125rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+        
+        .provider-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+        }
+        
+        .provider-category h4 {
+            font-size: 0.875rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+        
+        .provider-category.growing h4 { color: #16a34a; }
+        .provider-category.moderate h4 { color: #ea580c; }
+        .provider-category.severe h4 { color: #dc2626; }
+        
+        .provider-list {
+            font-size: 0.75rem;
+            color: #374151;
+            line-height: 1.6;
+        }
+        
+        .provider-list li {
+            margin-bottom: 0.25rem;
+        }
+        
+        .change-value.green { color: #16a34a; font-weight: 600; }
+        .change-value.orange { color: #ea580c; }
+        .change-value.red { color: #dc2626; font-weight: 600; }
+        
+        .footer {
+            margin-top: 1.5rem;
+            text-align: center;
+        }
+        
+        .footer-content {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.75rem;
+            color: #6b7280;
+        }
+        
+        .footer-content svg {
+            width: 1rem;
+            height: 1rem;
+            fill: #6b7280;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>Oncology Augmedix Live Performance Analysis</h1>
+            <svg viewBox="0 0 24 24">
+                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
             </svg>
-          </div>
         </div>
-
-        <p className="text-red-600 font-semibold mb-6">Significant decline in productivity across Oncology Augmedix Live users.</p>
-
-        {/* Metrics Grid */}
-        <div className="grid grid-cols-4 gap-6 mb-12">
-          {metrics.map((metric, idx) => (
-            <div key={idx} className="bg-white rounded-lg p-4 shadow-sm border border-gray-200">
-              <div className="text-sm font-medium text-gray-700 mb-4 h-12">{metric.label}</div>
-              
-              <ResponsiveContainer width="100%" height={120}>
-                <BarChart data={getChartData(metric)}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="name" tick={{ fontSize: 10 }} />
-                  <YAxis tick={{ fontSize: 10 }} />
-                  <Bar dataKey="value" radius={[4, 4, 0, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
-
-              <div className="flex justify-between items-center mt-2">
-                <div className="text-xs text-gray-500 space-y-1">
-                  <div>Pre: {metric.pre}</div>
-                  <div>Post: {metric.post}</div>
-                  <div>Curr: {metric.current}</div>
+        
+        <p class="alert-text">Significant decline in productivity across Oncology Augmedix Live users</p>
+        
+        <!-- Metrics Grid -->
+        <div class="metrics-grid">
+            <!-- Metric 1 -->
+            <div class="metric-card">
+                <div class="metric-title">Average Monthly wRVU</div>
+                <div class="chart-container">
+                    <div class="chart-bars">
+                        <div class="bar-group">
+                            <div class="bar baseline" style="height: 100px;"></div>
+                            <div class="bar-label">Pre-Live<br>608</div>
+                        </div>
+                        <div class="bar-group">
+                            <div class="bar" style="height: 90px;"></div>
+                            <div class="bar-label">With Live<br>550</div>
+                        </div>
+                        <div class="bar-group">
+                            <div class="bar" style="height: 62px;"></div>
+                            <div class="bar-label">Aug 2025<br>374</div>
+                        </div>
+                    </div>
                 </div>
-                <div className={`text-sm font-semibold ${
-                  metric.label.includes('Days To Chart') 
-                    ? (metric.current < metric.pre ? 'text-green-600' : 'text-red-600')
-                    : (metric.current > metric.pre ? 'text-green-600' : 'text-red-600')
-                }`}>
-                  {metric.label.includes('Days To Chart')
-                    ? `${((metric.pre - metric.current) / metric.pre * 100).toFixed(0)}%`
-                    : `${((metric.current - metric.pre) / metric.pre * 100).toFixed(0)}%`
-                  }
+                <div class="metric-footer">
+                    <div class="metric-values">
+                        <div>Pre: 608</div>
+                        <div>Post: 550</div>
+                        <div>Curr: 374</div>
+                    </div>
+                    <div class="metric-change negative">-38%</div>
                 </div>
-              </div>
             </div>
-          ))}
-        </div>
-
-        {/* Bottom Section */}
-        <div className="grid grid-cols-3 gap-6">
-          
-          {/* Left - Impact Statement */}
-          <div className="col-span-1 bg-gradient-to-br from-gray-900 to-gray-800 text-white rounded-lg p-8 shadow-lg">
-            <h2 className="text-2xl font-bold mb-6">Ambient Live Performance Analysis</h2>
             
-            <div className="mb-8">
-              <div className="text-5xl font-bold text-red-400 mb-2">-38.6%</div>
-              <div className="text-xl font-semibold mb-2">Work RVU Decline</div>
-              <div className="text-sm text-gray-400">August 2025 vs August 2024</div>
+            <!-- Metric 2 -->
+            <div class="metric-card">
+                <div class="metric-title">Average Patient Encounters Per Provider</div>
+                <div class="chart-container">
+                    <div class="chart-bars">
+                        <div class="bar-group">
+                            <div class="bar baseline" style="height: 100px;"></div>
+                            <div class="bar-label">Pre-Live<br>2.8</div>
+                        </div>
+                        <div class="bar-group">
+                            <div class="bar" style="height: 93px;"></div>
+                            <div class="bar-label">With Live<br>2.6</div>
+                        </div>
+                        <div class="bar-group">
+                            <div class="bar" style="height: 86px;"></div>
+                            <div class="bar-label">Aug 2025<br>2.4</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="metric-footer">
+                    <div class="metric-values">
+                        <div>Pre: 2.8</div>
+                        <div>Post: 2.6</div>
+                        <div>Curr: 2.4</div>
+                    </div>
+                    <div class="metric-change negative">-14%</div>
+                </div>
             </div>
-
-            <div className="mb-8">
-              <div className="text-4xl font-bold text-red-400 mb-2">-42.7%</div>
-              <div className="text-lg font-semibold mb-2">Net Revenue Impact</div>
-              <div className="text-sm text-gray-400">After Augmedix costs</div>
-            </div>
-
-            <div className="border-t border-gray-700 pt-6 mb-6">
-              <div className="text-sm text-gray-300 italic mb-4">
-                "Critical findings: Oncology Augmedix users underperforming PAMF average by 16 points. 
-                Immediate investigation required to understand root causes and determine corrective action."
-              </div>
-              <div className="text-xs text-gray-500">
-                - Customer Success Team Analysis
-              </div>
-            </div>
-
-            <div className="bg-red-900/30 border border-red-700 rounded p-3">
-              <div className="text-xs text-red-200 font-semibold mb-1">CRITICAL</div>
-              <div className="text-xs text-red-100">
-                17 users at $2,800/mo = $47,600 monthly cost with negative productivity ROI
-              </div>
-            </div>
-          </div>
-
-          {/* Right - Performance Data */}
-          <div className="col-span-2">
             
-            {/* Alert Boxes */}
-            <div className="grid grid-cols-2 gap-4 mb-6">
-              <div className="bg-gradient-to-r from-red-600 to-red-700 text-white rounded-lg p-6 shadow-lg">
-                <div className="text-lg font-semibold mb-2">Oncology Crisis</div>
-                <div className="text-4xl font-bold mb-1">-38.6%</div>
-                <div className="text-sm opacity-90">wRVU decline (Aug vs Aug)</div>
-                <div className="text-xs opacity-75 mt-2">16 pts worse than PAMF average</div>
-              </div>
-              
-              <div className="bg-gradient-to-r from-orange-600 to-orange-700 text-white rounded-lg p-6 shadow-lg">
-                <div className="text-lg font-semibold mb-2">Immediate Action Needed</div>
-                <div className="text-4xl font-bold mb-1">9/17</div>
-                <div className="text-sm opacity-90">Providers declining >30%</div>
-                <div className="text-xs opacity-75 mt-2">2 providers at zero output</div>
-              </div>
-            </div>
-
-            {/* Performance Table */}
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-              <div className="bg-gray-50 px-6 py-3 border-b border-gray-200">
-                <h3 className="text-lg font-semibold text-gray-900">17 Oncology Augmedix Live Users Evaluated</h3>
-              </div>
-              
-              <table className="w-full">
-                <thead className="bg-gray-50 border-b border-gray-200">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Metric</th>
-                    <th className="px-6 py-3 text-right text-xs font-semibold text-gray-600 uppercase">Pre-Live Baseline</th>
-                    <th className="px-6 py-3 text-right text-xs font-semibold text-gray-600 uppercase">Post-Live Performance</th>
-                    <th className="px-6 py-3 text-right text-xs font-semibold text-gray-600 uppercase">Delta</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-200">
-                  <tr className="hover:bg-gray-50">
-                    <td className="px-6 py-4 text-sm font-medium text-gray-900">Monthly wRVUs</td>
-                    <td className="px-6 py-4 text-sm text-right text-gray-700">10,335</td>
-                    <td className="px-6 py-4 text-sm text-right font-semibold text-red-600">6,349</td>
-                    <td className="px-6 py-4 text-sm text-right font-semibold text-red-600">-3,986</td>
-                  </tr>
-                  <tr className="hover:bg-gray-50">
-                    <td className="px-6 py-4 text-sm font-medium text-gray-900">Revenue per wRVU</td>
-                    <td className="px-6 py-4 text-sm text-right text-gray-700">$112</td>
-                    <td className="px-6 py-4 text-sm text-right text-gray-700">$112</td>
-                    <td className="px-6 py-4 text-sm text-right text-gray-500">--</td>
-                  </tr>
-                  <tr className="hover:bg-gray-50">
-                    <td className="px-6 py-4 text-sm font-medium text-gray-900">Total Revenue</td>
-                    <td className="px-6 py-4 text-sm text-right text-gray-700">$1,157,488</td>
-                    <td className="px-6 py-4 text-sm text-right font-semibold text-red-600">$711,056</td>
-                    <td className="px-6 py-4 text-sm text-right font-semibold text-red-600">-$446,432</td>
-                  </tr>
-                  <tr className="bg-blue-50 hover:bg-blue-100">
-                    <td className="px-6 py-4 text-sm font-medium text-gray-900">
-                      Avg Cost of Live
-                      <div className="text-xs text-gray-500 font-normal">(17 users)</div>
-                    </td>
-                    <td className="px-6 py-4 text-sm text-right text-gray-700">--</td>
-                    <td className="px-6 py-4 text-sm text-right font-semibold text-blue-600">($47,600)</td>
-                    <td className="px-6 py-4 text-sm text-right font-semibold text-blue-600">($47,600)</td>
-                  </tr>
-                  <tr className="bg-gray-100 font-semibold hover:bg-gray-200">
-                    <td className="px-6 py-4 text-sm font-bold text-gray-900">Monthly Net Revenue</td>
-                    <td className="px-6 py-4 text-sm text-right text-gray-900">$1,157,488</td>
-                    <td className="px-6 py-4 text-sm text-right font-bold text-red-700">$663,456</td>
-                    <td className="px-6 py-4 text-sm text-right font-bold text-red-700">-$494,032</td>
-                  </tr>
-                </tbody>
-              </table>
-
-              <div className="bg-red-50 px-6 py-4 border-t border-red-200">
-                <div className="flex items-start gap-2 text-xs text-red-800">
-                  <svg className="w-4 h-4 mt-0.5 flex-shrink-0 text-red-600" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
-                  </svg>
-                  <div>
-                    <strong>Critical Alert:</strong> These 17 Oncology providers using Augmedix Live show a <strong>-38.6% productivity decline</strong>, 
-                    performing <strong>16.1 points worse</strong> than the overall PAMF average of -22.5%. This represents a 
-                    <strong>-$494,032 monthly net revenue loss</strong> (-42.7%) after Augmedix costs. 
-                    <span className="font-semibold block mt-2">Root cause investigation and immediate intervention required.</span>
-                  </div>
+            <!-- Metric 3 -->
+            <div class="metric-card">
+                <div class="metric-title">Average Monthly Patient Encounters</div>
+                <div class="chart-container">
+                    <div class="chart-bars">
+                        <div class="bar-group">
+                            <div class="bar baseline" style="height: 100px;"></div>
+                            <div class="bar-label">Pre-Live<br>150</div>
+                        </div>
+                        <div class="bar-group">
+                            <div class="bar" style="height: 97px;"></div>
+                            <div class="bar-label">With Live<br>145</div>
+                        </div>
+                        <div class="bar-group">
+                            <div class="bar" style="height: 90px;"></div>
+                            <div class="bar-label">Aug 2025<br>135</div>
+                        </div>
+                    </div>
                 </div>
-              </div>
-            </div>
-
-            {/* Action Items */}
-            <div className="grid grid-cols-2 gap-4 mt-6">
-              <div className="bg-red-50 border border-red-300 rounded-lg p-4">
-                <div className="font-semibold text-red-900 mb-2 flex items-center gap-2">
-                  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
-                  </svg>
-                  Critical Actions
+                <div class="metric-footer">
+                    <div class="metric-values">
+                        <div>Pre: 150</div>
+                        <div>Post: 145</div>
+                        <div>Curr: 135</div>
+                    </div>
+                    <div class="metric-change negative">-10%</div>
                 </div>
-                <ul className="text-xs text-red-800 space-y-1">
-                  <li>• Identify why 2 providers at zero output</li>
-                  <li>• Interview 9 declining providers</li>
-                  <li>• Compare to non-Augmedix oncologists</li>
-                  <li>• Review product issues/support tickets</li>
-                </ul>
-              </div>
-
-              <div className="bg-green-50 border border-green-300 rounded-lg p-4">
-                <div className="font-semibold text-green-900 mb-2 flex items-center gap-2">
-                  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
-                  </svg>
-                  Bright Spots (4 growing)
-                </div>
-                <ul className="text-xs text-green-800 space-y-1">
-                  <li>• McLain: +255% growth</li>
-                  <li>• Dutton: +48% growth</li>
-                  <li>• Chart closure: -49% improvement</li>
-                  <li>• Learn from successful users</li>
-                </ul>
-              </div>
             </div>
-          </div>
+            
+            <!-- Metric 4 -->
+            <div class="metric-card">
+                <div class="metric-title">Average wRVU Per Encounter</div>
+                <div class="chart-container">
+                    <div class="chart-bars">
+                        <div class="bar-group">
+                            <div class="bar baseline" style="height: 100px;"></div>
+                            <div class="bar-label">Pre-Live<br>4.1</div>
+                        </div>
+                        <div class="bar-group">
+                            <div class="bar" style="height: 93px;"></div>
+                            <div class="bar-label">With Live<br>3.8</div>
+                        </div>
+                        <div class="bar-group">
+                            <div class="bar" style="height: 68px;"></div>
+                            <div class="bar-label">Aug 2025<br>2.8</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="metric-footer">
+                    <div class="metric-values">
+                        <div>Pre: 4.1</div>
+                        <div>Post: 3.8</div>
+                        <div>Curr: 2.8</div>
+                    </div>
+                    <div class="metric-change negative">-32%</div>
+                </div>
+            </div>
+            
+            <!-- Metric 5 -->
+            <div class="metric-card">
+                <div class="metric-title">Average Monthly FTE</div>
+                <div class="chart-container">
+                    <div class="chart-bars">
+                        <div class="bar-group">
+                            <div class="bar baseline" style="height: 100px;"></div>
+                            <div class="bar-label">Pre-Live<br>0.92</div>
+                        </div>
+                        <div class="bar-group">
+                            <div class="bar" style="height: 98px;"></div>
+                            <div class="bar-label">With Live<br>0.90</div>
+                        </div>
+                        <div class="bar-group">
+                            <div class="bar" style="height: 92px;"></div>
+                            <div class="bar-label">Aug 2025<br>0.85</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="metric-footer">
+                    <div class="metric-values">
+                        <div>Pre: 0.92</div>
+                        <div>Post: 0.90</div>
+                        <div>Curr: 0.85</div>
+                    </div>
+                    <div class="metric-change negative">-8%</div>
+                </div>
+            </div>
+            
+            <!-- Metric 6 -->
+            <div class="metric-card">
+                <div class="metric-title">Average Patients Seen Per Day</div>
+                <div class="chart-container">
+                    <div class="chart-bars">
+                        <div class="bar-group">
+                            <div class="bar baseline" style="height: 100px;"></div>
+                            <div class="bar-label">Pre-Live<br>12</div>
+                        </div>
+                        <div class="bar-group">
+                            <div class="bar" style="height: 92px;"></div>
+                            <div class="bar-label">With Live<br>11</div>
+                        </div>
+                        <div class="bar-group">
+                            <div class="bar" style="height: 83px;"></div>
+                            <div class="bar-label">Aug 2025<br>10</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="metric-footer">
+                    <div class="metric-values">
+                        <div>Pre: 12</div>
+                        <div>Post: 11</div>
+                        <div>Curr: 10</div>
+                    </div>
+                    <div class="metric-change negative">-17%</div>
+                </div>
+            </div>
+            
+            <!-- Metric 7 -->
+            <div class="metric-card">
+                <div class="metric-title">Average wRVU Per Schedulable Hour</div>
+                <div class="chart-container">
+                    <div class="chart-bars">
+                        <div class="bar-group">
+                            <div class="bar baseline" style="height: 100px;"></div>
+                            <div class="bar-label">Pre-Live<br>5.2</div>
+                        </div>
+                        <div class="bar-group">
+                            <div class="bar" style="height: 92px;"></div>
+                            <div class="bar-label">With Live<br>4.8</div>
+                        </div>
+                        <div class="bar-group">
+                            <div class="bar" style="height: 73px;"></div>
+                            <div class="bar-label">Aug 2025<br>3.8</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="metric-footer">
+                    <div class="metric-values">
+                        <div>Pre: 5.2</div>
+                        <div>Post: 4.8</div>
+                        <div>Curr: 3.8</div>
+                    </div>
+                    <div class="metric-change negative">-27%</div>
+                </div>
+            </div>
+            
+            <!-- Metric 8 -->
+            <div class="metric-card">
+                <div class="metric-title">Average Days To Chart Closure</div>
+                <div class="chart-container">
+                    <div class="chart-bars">
+                        <div class="bar-group">
+                            <div class="bar baseline" style="height: 100px;"></div>
+                            <div class="bar-label">Pre-Live<br>8.2</div>
+                        </div>
+                        <div class="bar-group">
+                            <div class="bar" style="height: 79px;"></div>
+                            <div class="bar-label">With Live<br>6.5</div>
+                        </div>
+                        <div class="bar-group">
+                            <div class="bar" style="height: 51px;"></div>
+                            <div class="bar-label">Aug 2025<br>4.2</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="metric-footer">
+                    <div class="metric-values">
+                        <div>Pre: 8.2</div>
+                        <div>Post: 6.5</div>
+                        <div>Curr: 4.2</div>
+                    </div>
+                    <div class="metric-change positive">-49%</div>
+                </div>
+            </div>
         </div>
-
-        {/* Footer with detailed breakdown */}
-        <div className="mt-8 bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Provider-Level Performance Breakdown</h3>
-          
-          <div className="grid grid-cols-3 gap-6">
+        
+        <!-- Main Content Section -->
+        <div class="main-content">
+            <!-- Left Column - Impact Statement -->
             <div>
-              <h4 className="text-sm font-semibold text-green-700 mb-2">Growing (4 providers)</h4>
-              <ul className="text-xs text-gray-700 space-y-1">
-                <li>• McLain, Julian: <span className="text-green-600 font-semibold">+255%</span></li>
-                <li>• Dutton, Sharon: <span className="text-green-600 font-semibold">+48%</span></li>
-                <li>• de Bruin, Monique: <span className="text-green-600 font-semibold">+34%</span></li>
-                <li>• Chakravarthi, Priya: <span className="text-green-600 font-semibold">New</span></li>
-              </ul>
+                <div class="impact-box">
+                    <h2>Ambient Live Performance Analysis</h2>
+                    
+                    <div class="big-stat">
+                        <div class="big-number red">-38.6%</div>
+                        <div class="big-label">Work RVU Decline</div>
+                        <div class="big-sublabel">August 2025 vs August 2024</div>
+                    </div>
+                    
+                    <div class="big-stat">
+                        <div class="big-number red" style="font-size: 2.5rem;">-42.7%</div>
+                        <div class="big-label" style="font-size: 1.125rem;">Net Revenue Impact</div>
+                        <div class="big-sublabel">After Augmedix costs</div>
+                    </div>
+                    
+                    <div class="divider">
+                        <div class="quote">
+                            "Critical findings: Oncology Augmedix users underperforming PAMF average by 16 points. 
+                            Immediate investigation required to understand root causes and determine corrective action."
+                        </div>
+                        <div class="quote-author">
+                            - Customer Success Team Analysis
+                        </div>
+                    </div>
+                    
+                    <div class="critical-box">
+                        <div class="critical-label">CRITICAL</div>
+                        <div class="critical-text">
+                            17 users at $2,800/mo = $47,600 monthly cost with negative productivity ROI
+                        </div>
+                    </div>
+                </div>
             </div>
             
-            <div>
-              <h4 className="text-sm font-semibold text-orange-700 mb-2">Moderate Decline (4 providers)</h4>
-              <ul className="text-xs text-gray-700 space-y-1">
-                <li>• Kuo, Debbie: <span className="text-orange-600">-3%</span></li>
-                <li>• Chang, Alison: <span className="text-orange-600">-18%</span></li>
-                <li>• Colocci, Natalia: <span className="text-orange-600">-23%</span></li>
-                <li>• Sheh, Bryant: <span className="text-orange-600">-36%</span></li>
-              </ul>
+            <!-- Right Column - Performance Data -->
+            <div class="right-column">
+                <!-- Alert Boxes -->
+                <div class="alert-boxes">
+                    <div class="alert-box">
+                        <h3>Oncology Crisis</h3>
+                        <div class="alert-number">-38.6%</div>
+                        <div class="alert-desc">wRVU decline (Aug vs Aug)</div>
+                        <div class="alert-detail">16 pts worse than PAMF average</div>
+                    </div>
+                    
+                    <div class="alert-box orange">
+                        <h3>Immediate Action Needed</h3>
+                        <div class="alert-number">9/17</div>
+                        <div class="alert-desc">Providers declining >30%</div>
+                        <div class="alert-detail">2 providers at zero output</div>
+                    </div>
+                </div>
+                
+                <!-- Performance Table -->
+                <div class="performance-table">
+                    <div class="table-header">
+                        <h3>17 Oncology Augmedix Live Users Evaluated</h3>
+                    </div>
+                    
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Metric</th>
+                                <th class="right">Pre-Live Baseline</th>
+                                <th class="right">Post-Live Performance</th>
+                                <th class="right">Delta</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Monthly wRVUs</strong></td>
+                                <td class="right">10,335</td>
+                                <td class="right" style="color: #dc2626; font-weight: 600;">6,349</td>
+                                <td class="right" style="color: #dc2626; font-weight: 600;">-3,986</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Revenue per wRVU</strong></td>
+                                <td class="right">$112</td>
+                                <td class="right">$112</td>
+                                <td class="right" style="color: #6b7280;">--</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Total Revenue</strong></td>
+                                <td class="right">$1,157,488</td>
+                                <td class="right" style="color: #dc2626; font-weight: 600;">$711,056</td>
+                                <td class="right" style="color: #dc2626; font-weight: 600;">-$446,432</td>
+                            </tr>
+                            <tr class="highlight-row">
+                                <td>
+                                    <strong>Avg Cost of Live</strong>
+                                    <div style="font-size: 0.75rem; color: #6b7280; font-weight: normal;">(17 users)</div>
+                                </td>
+                                <td class="right">--</td>
+                                <td class="right" style="color: #3b82f6; font-weight: 600;">($47,600)</td>
+                                <td class="right" style="color: #3b82f6; font-weight: 600;">($47,600)</td>
+                            </tr>
+                            <tr class="total-row">
+                                <td><strong>Monthly Net Revenue</strong></td>
+                                <td class="right">$1,157,488</td>
+                                <td class="right" style="color: #b91c1c; font-weight: bold;">$663,456</td>
+                                <td class="right" style="color: #b91c1c; font-weight: bold;">-$494,032</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    
+                    <div class="table-footer">
+                        <div class="footer-alert">
+                            <svg viewBox="0 0 24 24">
+                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+                            </svg>
+                            <div>
+                                <strong>Critical Alert:</strong> These 17 Oncology providers using Augmedix Live show a <strong>-38.6% productivity decline</strong>, 
+                                performing <strong>16.1 points worse</strong> than the overall PAMF average of -22.5%. This represents a 
+                                <strong>-$494,032 monthly net revenue loss</strong> (-42.7%) after Augmedix costs. 
+                                <strong style="display: block; margin-top: 0.5rem;">Root cause investigation and immediate intervention required. Keep in mind baseline numbers are being reviewed which could be the root cause of the issue.</strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Action Boxes -->
+                <div class="action-boxes">
+                    <div class="action-box red">
+                        <div class="action-header red">
+                            <svg viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+                            </svg>
+                            Critical Actions
+                        </div>
+                        <div class="action-list red">
+                            • Identify why 2 providers at zero output<br>
+                            • Interview 9 declining providers<br>
+                            • Compare to non-Augmedix oncologists<br>
+                            • Review product issues/support tickets
+                        </div>
+                    </div>
+                    
+                    <div class="action-box green">
+                        <div class="action-header green">
+                            <svg viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                            </svg>
+                            Bright Spots (4 growing)
+                        </div>
+                        <div class="action-list green">
+                            • McLain: +255% growth<br>
+                            • Dutton: +48% growth<br>
+                            • Chart closure: -49% improvement<br>
+                            • Learn from successful users
+                        </div>
+                    </div>
+                </div>
             </div>
+        </div>
+        
+        <!-- Provider Breakdown -->
+        <div class="provider-breakdown">
+            <h3>Provider-Level Performance Breakdown</h3>
             
-            <div>
-              <h4 className="text-sm font-semibold text-red-700 mb-2">Severe Decline (9 providers)</h4>
-              <ul className="text-xs text-gray-700 space-y-1">
-                <li>• Schiffner, Daniel: <span className="text-red-600 font-semibold">-41%</span></li>
-                <li>• Mohajer, Roozbeh: <span className="text-red-600 font-semibold">-48%</span></li>
-                <li>• Hsieh, Gillian: <span className="text-red-600 font-semibold">-55%</span></li>
-                <li>• Black, Laura: <span className="text-red-600 font-semibold">-67%</span></li>
-                <li>• Kwan-Feinberg, Rita: <span className="text-red-600 font-semibold">-67%</span></li>
-                <li>• Peralta, Elizabeth: <span className="text-red-600 font-semibold">-70%</span></li>
-                <li>• Ching, Denise: <span className="text-red-600 font-semibold">-96%</span></li>
-                <li>• MacDermed, Dhara: <span className="text-red-600 font-semibold">-100%</span></li>
-                <li>• Abdul-Wahab, Muhammad: <span className="text-red-600 font-semibold">-100%</span></li>
-              </ul>
+            <div class="provider-grid">
+                <div class="provider-category growing">
+                    <h4>Growing (4 providers)</h4>
+                    <ul class="provider-list">
+                        <li>• McLain, Julian: <span class="change-value green">+255%</span></li>
+                        <li>• Dutton, Sharon: <span class="change-value green">+48%</span></li>
+                        <li>• de Bruin, Monique: <span class="change-value green">+34%</span></li>
+                        <li>• Chakravarthi, Priya: <span class="change-value green">New</span></li>
+                    </ul>
+                </div>
+                
+                <div class="provider-category moderate">
+                    <h4>Moderate Decline (4 providers)</h4>
+                    <ul class="provider-list">
+                        <li>• Kuo, Debbie: <span class="change-value orange">-3%</span></li>
+                        <li>• Chang, Alison: <span class="change-value orange">-18%</span></li>
+                        <li>• Colocci, Natalia: <span class="change-value orange">-23%</span></li>
+                        <li>• Sheh, Bryant: <span class="change-value orange">-36%</span></li>
+                    </ul>
+                </div>
+                
+                <div class="provider-category severe">
+                    <h4>Severe Decline (9 providers)</h4>
+                    <ul class="provider-list">
+                        <li>• Schiffner, Daniel: <span class="change-value red">-41%</span></li>
+                        <li>• Mohajer, Roozbeh: <span class="change-value red">-48%</span></li>
+                        <li>• Hsieh, Gillian: <span class="change-value red">-55%</span></li>
+                        <li>• Black, Laura: <span class="change-value red">-67%</span></li>
+                        <li>• Kwan-Feinberg, Rita: <span class="change-value red">-67%</span></li>
+                        <li>• Peralta, Elizabeth: <span class="change-value red">-70%</span></li>
+                        <li>• Ching, Denise: <span class="change-value red">-96%</span></li>
+                        <li>• MacDermed, Dhara: <span class="change-value red">-100%</span></li>
+                        <li>• Abdul-Wahab, Muhammad: <span class="change-value red">-100%</span></li>
+                    </ul>
+                </div>
             </div>
-          </div>
         </div>
-
-        {/* Final Footer */}
-        <div className="mt-6 text-center">
-          <div className="inline-flex items-center gap-2 text-xs text-gray-500">
-            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M19 3h-4.18C14.4 1.84 13.3 1 12 1c-1.3 0-2.4.84-2.82 2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 0c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1z"/>
-            </svg>
-             <span>Keep in mind baseline data is being looked over for providers so this is subject to change.</span>
-            <span>Analysis based on actual wRVU and tRVU data | August 2024 vs August 2025 | 17 Oncology Augmedix Live users</span>
-          </div>
+        
+        <!-- Footer -->
+        <div class="footer">
+            <div class="footer-content">
+                <svg viewBox="0 0 24 24">
+                    <path d="M19 3h-4.18C14.4 1.84 13.3 1 12 1c-1.3 0-2.4.84-2.82 2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 0c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1z"/>
+                </svg>
+                <span>Analysis based on actual wRVU and tRVU data | August 2024 vs August 2025 | 17 Oncology Augmedix Live users</span>
+            </div>
         </div>
-      </div>
     </div>
-  );
-};
-
-export default OncologyAnalysis;
+</body>
+</html>
