@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Oncology Augmedix Live Performance Analysis</title>
+    <title>Oncology Augmedix Performance Analysis</title>
     <style>
         * {
             margin: 0;
@@ -45,8 +45,40 @@
         .alert-text {
             color: #dc2626;
             font-weight: 600;
-            margin-bottom: 1.5rem;
+            margin-bottom: 1rem;
             font-size: 0.95rem;
+        }
+        
+        .legend {
+            display: flex;
+            gap: 2rem;
+            margin-bottom: 1.5rem;
+            padding: 1rem;
+            background: white;
+            border-radius: 0.5rem;
+            border: 1px solid #e5e7eb;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+        
+        .legend-box {
+            width: 1.5rem;
+            height: 1.5rem;
+            border-radius: 0.25rem;
+        }
+        
+        .legend-box.wrvu {
+            background: linear-gradient(135deg, #3b82f6, #60a5fa);
+        }
+        
+        .legend-box.trvu {
+            background: linear-gradient(135deg, #10b981, #34d399);
         }
         
         .metrics-grid {
@@ -64,12 +96,37 @@
             border: 1px solid #e5e7eb;
         }
         
+        .metric-card.trvu-card {
+            border: 2px solid #10b981;
+        }
+        
         .metric-title {
             font-size: 0.875rem;
             font-weight: 500;
             color: #374151;
-            margin-bottom: 1rem;
+            margin-bottom: 0.5rem;
             min-height: 3rem;
+            display: flex;
+            align-items: center;
+        }
+        
+        .metric-badge {
+            display: inline-block;
+            padding: 0.125rem 0.5rem;
+            border-radius: 0.25rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-left: 0.5rem;
+        }
+        
+        .metric-badge.wrvu {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+        
+        .metric-badge.trvu {
+            background: #d1fae5;
+            color: #065f46;
         }
         
         .chart-container {
@@ -94,7 +151,6 @@
         
         .bar {
             width: 40px;
-            background: linear-gradient(to top, #3b82f6, #60a5fa);
             border-radius: 4px 4px 0 0;
             transition: all 0.3s;
         }
@@ -105,6 +161,14 @@
         
         .bar.baseline {
             background: linear-gradient(to top, #9ca3af, #d1d5db);
+        }
+        
+        .bar.wrvu {
+            background: linear-gradient(to top, #3b82f6, #60a5fa);
+        }
+        
+        .bar.trvu {
+            background: linear-gradient(to top, #10b981, #34d399);
         }
         
         .bar-label {
@@ -133,6 +197,109 @@
         
         .positive { color: #16a34a; }
         .negative { color: #dc2626; }
+        
+        .comparison-section {
+            background: white;
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            border: 1px solid #e5e7eb;
+        }
+        
+        .comparison-section h2 {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+        }
+        
+        .comparison-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+        
+        .comparison-chart {
+            background: #f9fafb;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+        }
+        
+        .comparison-chart h3 {
+            font-size: 1.125rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: #111827;
+        }
+        
+        .comparison-bars {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+        
+        .comparison-row {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .comparison-label {
+            font-size: 0.875rem;
+            font-weight: 500;
+            min-width: 100px;
+            color: #374151;
+        }
+        
+        .comparison-bar-container {
+            flex: 1;
+            height: 40px;
+            background: #e5e7eb;
+            border-radius: 0.25rem;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .comparison-bar-fill {
+            height: 100%;
+            border-radius: 0.25rem;
+            display: flex;
+            align-items: center;
+            padding: 0 0.75rem;
+            color: white;
+            font-weight: 600;
+            font-size: 0.875rem;
+            transition: width 0.5s ease;
+        }
+        
+        .comparison-bar-fill.wrvu {
+            background: linear-gradient(90deg, #3b82f6, #60a5fa);
+        }
+        
+        .comparison-bar-fill.trvu {
+            background: linear-gradient(90deg, #10b981, #34d399);
+        }
+        
+        .insight-box {
+            background: #fef3c7;
+            border: 2px solid #fbbf24;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin-top: 1.5rem;
+        }
+        
+        .insight-box h4 {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #92400e;
+            margin-bottom: 0.5rem;
+        }
+        
+        .insight-box p {
+            font-size: 0.875rem;
+            color: #78350f;
+            line-height: 1.5;
+        }
         
         .main-content {
             display: grid;
@@ -175,6 +342,37 @@
             font-size: 0.875rem;
             color: #9ca3af;
         }
+        
+        .stat-comparison {
+            background: rgba(59, 130, 246, 0.1);
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.75rem;
+        }
+        
+        .stat-row:last-child {
+            margin-bottom: 0;
+        }
+        
+        .stat-label {
+            font-size: 0.875rem;
+            color: #d1d5db;
+        }
+        
+        .stat-value {
+            font-size: 1.125rem;
+            font-weight: 600;
+        }
+        
+        .stat-value.wrvu { color: #60a5fa; }
+        .stat-value.trvu { color: #34d399; }
         
         .divider {
             border-top: 1px solid #374151;
@@ -459,7 +657,7 @@
     <div class="container">
         <!-- Header -->
         <div class="header">
-            <h1>Oncology Augmedix Live Performance Analysis</h1>
+            <h1>Summary of all metrics</h1>
             <svg viewBox="0 0 24 24">
                 <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
             </svg>
@@ -467,11 +665,26 @@
         
         <p class="alert-text">Significant decline in productivity across Oncology Augmedix Live users</p>
         
+        <!-- Legend -->
+        <div class="legend">
+            <div class="legend-item">
+                <div class="legend-box wrvu"></div>
+                <span>Work RVU (wRVU)/span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-box trvu"></div>
+                <span>Total RVU (tRVU)</span>
+            </div>
+        </div>
+        
         <!-- Metrics Grid -->
         <div class="metrics-grid">
-            <!-- Metric 1 -->
+            <!-- wRVU Metric 1 -->
             <div class="metric-card">
-                <div class="metric-title">Average Monthly wRVU</div>
+                <div class="metric-title">
+                    Average Monthly wRVU
+                    <span class="metric-badge wrvu">wRVU</span>
+                </div>
                 <div class="chart-container">
                     <div class="chart-bars">
                         <div class="bar-group">
@@ -479,11 +692,11 @@
                             <div class="bar-label">Pre-Live<br>608</div>
                         </div>
                         <div class="bar-group">
-                            <div class="bar" style="height: 90px;"></div>
+                            <div class="bar wrvu" style="height: 90px;"></div>
                             <div class="bar-label">With Live<br>550</div>
                         </div>
                         <div class="bar-group">
-                            <div class="bar" style="height: 62px;"></div>
+                            <div class="bar wrvu" style="height: 62px;"></div>
                             <div class="bar-label">Aug 2025<br>374</div>
                         </div>
                     </div>
@@ -491,74 +704,49 @@
                 <div class="metric-footer">
                     <div class="metric-values">
                         <div>Pre: 608</div>
-                        <div>Post: 550</div>
                         <div>Curr: 374</div>
                     </div>
                     <div class="metric-change negative">-38%</div>
                 </div>
             </div>
             
-            <!-- Metric 2 -->
-            <div class="metric-card">
-                <div class="metric-title">Average Patient Encounters Per Provider</div>
+            <!-- tRVU Metric 1 -->
+            <div class="metric-card trvu-card">
+                <div class="metric-title">
+                    Average Monthly tRVU
+                    <span class="metric-badge trvu">tRVU</span>
+                </div>
                 <div class="chart-container">
                     <div class="chart-bars">
                         <div class="bar-group">
                             <div class="bar baseline" style="height: 100px;"></div>
-                            <div class="bar-label">Pre-Live<br>2.8</div>
+                            <div class="bar-label">Pre-Live<br>1,878</div>
                         </div>
                         <div class="bar-group">
-                            <div class="bar" style="height: 93px;"></div>
-                            <div class="bar-label">With Live<br>2.6</div>
+                            <div class="bar trvu" style="height: 85px;"></div>
+                            <div class="bar-label">With Live<br>1,600</div>
                         </div>
                         <div class="bar-group">
-                            <div class="bar" style="height: 86px;"></div>
-                            <div class="bar-label">Aug 2025<br>2.4</div>
+                            <div class="bar trvu" style="height: 69px;"></div>
+                            <div class="bar-label">Aug 2025<br>1,301</div>
                         </div>
                     </div>
                 </div>
                 <div class="metric-footer">
                     <div class="metric-values">
-                        <div>Pre: 2.8</div>
-                        <div>Post: 2.6</div>
-                        <div>Curr: 2.4</div>
+                        <div>Pre: 1,878</div>
+                        <div>Curr: 1,301</div>
                     </div>
-                    <div class="metric-change negative">-14%</div>
+                    <div class="metric-change negative">-31%</div>
                 </div>
             </div>
             
-            <!-- Metric 3 -->
+            <!-- wRVU Metric 2 -->
             <div class="metric-card">
-                <div class="metric-title">Average Monthly Patient Encounters</div>
-                <div class="chart-container">
-                    <div class="chart-bars">
-                        <div class="bar-group">
-                            <div class="bar baseline" style="height: 100px;"></div>
-                            <div class="bar-label">Pre-Live<br>150</div>
-                        </div>
-                        <div class="bar-group">
-                            <div class="bar" style="height: 97px;"></div>
-                            <div class="bar-label">With Live<br>145</div>
-                        </div>
-                        <div class="bar-group">
-                            <div class="bar" style="height: 90px;"></div>
-                            <div class="bar-label">Aug 2025<br>135</div>
-                        </div>
-                    </div>
+                <div class="metric-title">
+                    wRVU Per Encounter
+                    <span class="metric-badge wrvu">wRVU</span>
                 </div>
-                <div class="metric-footer">
-                    <div class="metric-values">
-                        <div>Pre: 150</div>
-                        <div>Post: 145</div>
-                        <div>Curr: 135</div>
-                    </div>
-                    <div class="metric-change negative">-10%</div>
-                </div>
-            </div>
-            
-            <!-- Metric 4 -->
-            <div class="metric-card">
-                <div class="metric-title">Average wRVU Per Encounter</div>
                 <div class="chart-container">
                     <div class="chart-bars">
                         <div class="bar-group">
@@ -566,11 +754,11 @@
                             <div class="bar-label">Pre-Live<br>4.1</div>
                         </div>
                         <div class="bar-group">
-                            <div class="bar" style="height: 93px;"></div>
+                            <div class="bar wrvu" style="height: 93px;"></div>
                             <div class="bar-label">With Live<br>3.8</div>
                         </div>
                         <div class="bar-group">
-                            <div class="bar" style="height: 68px;"></div>
+                            <div class="bar wrvu" style="height: 68px;"></div>
                             <div class="bar-label">Aug 2025<br>2.8</div>
                         </div>
                     </div>
@@ -578,14 +766,106 @@
                 <div class="metric-footer">
                     <div class="metric-values">
                         <div>Pre: 4.1</div>
-                        <div>Post: 3.8</div>
                         <div>Curr: 2.8</div>
                     </div>
                     <div class="metric-change negative">-32%</div>
                 </div>
             </div>
             
-            <!-- Metric 5 -->
+            <!-- tRVU Metric 2 -->
+            <div class="metric-card trvu-card">
+                <div class="metric-title">
+                    tRVU Per Encounter
+                    <span class="metric-badge trvu">tRVU</span>
+                </div>
+                <div class="chart-container">
+                    <div class="chart-bars">
+                        <div class="bar-group">
+                            <div class="bar baseline" style="height: 100px;"></div>
+                            <div class="bar-label">Pre-Live<br>12.5</div>
+                        </div>
+                        <div class="bar-group">
+                            <div class="bar trvu" style="height: 88px;"></div>
+                            <div class="bar-label">With Live<br>11.0</div>
+                        </div>
+                        <div class="bar-group">
+                            <div class="bar trvu" style="height: 78px;"></div>
+                            <div class="bar-label">Aug 2025<br>9.6</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="metric-footer">
+                    <div class="metric-values">
+                        <div>Pre: 12.5</div>
+                        <div>Curr: 9.6</div>
+                    </div>
+                    <div class="metric-change negative">-23%</div>
+                </div>
+            </div>
+            
+            <!-- wRVU Metric 3 -->
+            <div class="metric-card">
+                <div class="metric-title">
+                    wRVU Per Schedulable Hour
+                    <span class="metric-badge wrvu">wRVU</span>
+                </div>
+                <div class="chart-container">
+                    <div class="chart-bars">
+                        <div class="bar-group">
+                            <div class="bar baseline" style="height: 100px;"></div>
+                            <div class="bar-label">Pre-Live<br>5.2</div>
+                        </div>
+                        <div class="bar-group">
+                            <div class="bar wrvu" style="height: 92px;"></div>
+                            <div class="bar-label">With Live<br>4.8</div>
+                        </div>
+                        <div class="bar-group">
+                            <div class="bar wrvu" style="height: 73px;"></div>
+                            <div class="bar-label">Aug 2025<br>3.8</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="metric-footer">
+                    <div class="metric-values">
+                        <div>Pre: 5.2</div>
+                        <div>Curr: 3.8</div>
+                    </div>
+                    <div class="metric-change negative">-27%</div>
+                </div>
+            </div>
+            
+            <!-- tRVU Metric 3 -->
+            <div class="metric-card trvu-card">
+                <div class="metric-title">
+                    tRVU Per Schedulable Hour
+                    <span class="metric-badge trvu">tRVU</span>
+                </div>
+                <div class="chart-container">
+                    <div class="chart-bars">
+                        <div class="bar-group">
+                            <div class="bar baseline" style="height: 100px;"></div>
+                            <div class="bar-label">Pre-Live<br>16.0</div>
+                        </div>
+                        <div class="bar-group">
+                            <div class="bar trvu" style="height: 87px;"></div>
+                            <div class="bar-label">With Live<br>13.9</div>
+                        </div>
+                        <div class="bar-group">
+                            <div class="bar trvu" style="height: 75px;"></div>
+                            <div class="bar-label">Aug 2025<br>12.0</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="metric-footer">
+                    <div class="metric-values">
+                        <div>Pre: 16.0</div>
+                        <div>Curr: 12.0</div>
+                    </div>
+                    <div class="metric-change negative">-25%</div>
+                </div>
+            </div>
+            
+            <!-- Operational Metrics -->
             <div class="metric-card">
                 <div class="metric-title">Average Monthly FTE</div>
                 <div class="chart-container">
@@ -595,11 +875,11 @@
                             <div class="bar-label">Pre-Live<br>0.92</div>
                         </div>
                         <div class="bar-group">
-                            <div class="bar" style="height: 98px;"></div>
+                            <div class="bar" style="height: 98px; background: linear-gradient(to top, #6b7280, #9ca3af);"></div>
                             <div class="bar-label">With Live<br>0.90</div>
                         </div>
                         <div class="bar-group">
-                            <div class="bar" style="height: 92px;"></div>
+                            <div class="bar" style="height: 92px; background: linear-gradient(to top, #6b7280, #9ca3af);"></div>
                             <div class="bar-label">Aug 2025<br>0.85</div>
                         </div>
                     </div>
@@ -607,74 +887,14 @@
                 <div class="metric-footer">
                     <div class="metric-values">
                         <div>Pre: 0.92</div>
-                        <div>Post: 0.90</div>
                         <div>Curr: 0.85</div>
                     </div>
                     <div class="metric-change negative">-8%</div>
                 </div>
             </div>
             
-            <!-- Metric 6 -->
             <div class="metric-card">
-                <div class="metric-title">Average Patients Seen Per Day</div>
-                <div class="chart-container">
-                    <div class="chart-bars">
-                        <div class="bar-group">
-                            <div class="bar baseline" style="height: 100px;"></div>
-                            <div class="bar-label">Pre-Live<br>12</div>
-                        </div>
-                        <div class="bar-group">
-                            <div class="bar" style="height: 92px;"></div>
-                            <div class="bar-label">With Live<br>11</div>
-                        </div>
-                        <div class="bar-group">
-                            <div class="bar" style="height: 83px;"></div>
-                            <div class="bar-label">Aug 2025<br>10</div>
-                        </div>
-                    </div>
-                </div>
-                <div class="metric-footer">
-                    <div class="metric-values">
-                        <div>Pre: 12</div>
-                        <div>Post: 11</div>
-                        <div>Curr: 10</div>
-                    </div>
-                    <div class="metric-change negative">-17%</div>
-                </div>
-            </div>
-            
-            <!-- Metric 7 -->
-            <div class="metric-card">
-                <div class="metric-title">Average wRVU Per Schedulable Hour</div>
-                <div class="chart-container">
-                    <div class="chart-bars">
-                        <div class="bar-group">
-                            <div class="bar baseline" style="height: 100px;"></div>
-                            <div class="bar-label">Pre-Live<br>5.2</div>
-                        </div>
-                        <div class="bar-group">
-                            <div class="bar" style="height: 92px;"></div>
-                            <div class="bar-label">With Live<br>4.8</div>
-                        </div>
-                        <div class="bar-group">
-                            <div class="bar" style="height: 73px;"></div>
-                            <div class="bar-label">Aug 2025<br>3.8</div>
-                        </div>
-                    </div>
-                </div>
-                <div class="metric-footer">
-                    <div class="metric-values">
-                        <div>Pre: 5.2</div>
-                        <div>Post: 4.8</div>
-                        <div>Curr: 3.8</div>
-                    </div>
-                    <div class="metric-change negative">-27%</div>
-                </div>
-            </div>
-            
-            <!-- Metric 8 -->
-            <div class="metric-card">
-                <div class="metric-title">Average Days To Chart Closure</div>
+                <div class="metric-title">Days To Chart Closure</div>
                 <div class="chart-container">
                     <div class="chart-bars">
                         <div class="bar-group">
@@ -682,11 +902,11 @@
                             <div class="bar-label">Pre-Live<br>8.2</div>
                         </div>
                         <div class="bar-group">
-                            <div class="bar" style="height: 79px;"></div>
+                            <div class="bar" style="height: 79px; background: linear-gradient(to top, #16a34a, #22c55e);"></div>
                             <div class="bar-label">With Live<br>6.5</div>
                         </div>
                         <div class="bar-group">
-                            <div class="bar" style="height: 51px;"></div>
+                            <div class="bar" style="height: 51px; background: linear-gradient(to top, #16a34a, #22c55e);"></div>
                             <div class="bar-label">Aug 2025<br>4.2</div>
                         </div>
                     </div>
@@ -694,11 +914,106 @@
                 <div class="metric-footer">
                     <div class="metric-values">
                         <div>Pre: 8.2</div>
-                        <div>Post: 6.5</div>
                         <div>Curr: 4.2</div>
                     </div>
                     <div class="metric-change positive">-49%</div>
                 </div>
+            </div>
+        </div>
+        
+        <!-- wRVU vs tRVU Comparison Section -->
+        <div class="comparison-section">
+            <h2>📊 Work RVU vs Total RVU Trend Comparison</h2>
+            
+            <div class="comparison-grid">
+                <!-- August Comparison -->
+                <div class="comparison-chart">
+                    <h3>August 2024 vs August 2025</h3>
+                    <div class="comparison-bars">
+                        <div class="comparison-row">
+                            <div class="comparison-label">wRVU 2024</div>
+                            <div class="comparison-bar-container">
+                                <div class="comparison-bar-fill wrvu" style="width: 100%;">
+                                    10,335
+                                </div>
+                            </div>
+                        </div>
+                        <div class="comparison-row">
+                            <div class="comparison-label">wRVU 2025</div>
+                            <div class="comparison-bar-container">
+                                <div class="comparison-bar-fill wrvu" style="width: 61.4%;">
+                                    6,349 (-38.6%)
+                                </div>
+                            </div>
+                        </div>
+                        <div class="comparison-row">
+                            <div class="comparison-label">tRVU 2024</div>
+                            <div class="comparison-bar-container">
+                                <div class="comparison-bar-fill trvu" style="width: 100%;">
+                                    31,929
+                                </div>
+                            </div>
+                        </div>
+                        <div class="comparison-row">
+                            <div class="comparison-label">tRVU 2025</div>
+                            <div class="comparison-bar-container">
+                                <div class="comparison-bar-fill trvu" style="width: 69.2%;">
+                                    22,110 (-30.8%)
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- YTD Comparison -->
+                <div class="comparison-chart">
+                    <h3>Year-to-Date (Jan-Aug)</h3>
+                    <div class="comparison-bars">
+                        <div class="comparison-row">
+                            <div class="comparison-label">wRVU 2024</div>
+                            <div class="comparison-bar-container">
+                                <div class="comparison-bar-fill wrvu" style="width: 100%;">
+                                    76,750
+                                </div>
+                            </div>
+                        </div>
+                        <div class="comparison-row">
+                            <div class="comparison-label">wRVU 2025</div>
+                            <div class="comparison-bar-container">
+                                <div class="comparison-bar-fill wrvu" style="width: 95.4%;">
+                                    73,215 (-4.6%)
+                                </div>
+                            </div>
+                        </div>
+                        <div class="comparison-row">
+                            <div class="comparison-label">tRVU 2024</div>
+                            <div class="comparison-bar-container">
+                                <div class="comparison-bar-fill trvu" style="width: 100%;">
+                                    216,115
+                                </div>
+                            </div>
+                        </div>
+                        <div class="comparison-row">
+                            <div class="comparison-label">tRVU 2025</div>
+                            <div class="comparison-bar-container">
+                                <div class="comparison-bar-fill trvu" style="width: 105.3%;">
+                                    227,634 (+5.3%)
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="insight-box">
+                <h4>🔍 Key Insight: Divergent Trends Reveal Case Mix Shift</h4>
+                <p>
+                    <strong>August Dilemma:</strong> Work RVU declined 38.6% while Total RVU declined 30.8% - a 7.8 point difference. 
+                    This means facility costs (perhaps practice expense & malpractice) are holding up better than physician work, suggesting a shift 
+                    toward lower-complexity procedures and services. <strong>Year-to-Date:</strong> Total RVU is actually UP 5.3% while Work RVU is DOWN 4.6%, 
+                    indicating the August trend accelerated a pattern that's been building all year. This 9.9 point YTD divergence strongly suggests 
+                    case mix changes rather than pure volume loss.
+                </p>
             </div>
         </div>
         
@@ -715,6 +1030,21 @@
                         <div class="big-sublabel">August 2025 vs August 2024</div>
                     </div>
                     
+                    <div class="stat-comparison">
+                        <div class="stat-row">
+                            <span class="stat-label">wRVU Change</span>
+                            <span class="stat-value wrvu">-38.6%</span>
+                        </div>
+                        <div class="stat-row">
+                            <span class="stat-label">tRVU Change</span>
+                            <span class="stat-value trvu">-30.8%</span>
+                        </div>
+                        <div class="stat-row">
+                            <span class="stat-label">Divergence</span>
+                            <span class="stat-value" style="color: #fbbf24;">7.8 pts</span>
+                        </div>
+                    </div>
+                    
                     <div class="big-stat">
                         <div class="big-number red" style="font-size: 2.5rem;">-42.7%</div>
                         <div class="big-label" style="font-size: 1.125rem;">Net Revenue Impact</div>
@@ -723,11 +1053,11 @@
                     
                     <div class="divider">
                         <div class="quote">
-                            "Critical findings: Oncology Augmedix users underperforming PAMF average by 16 points. 
-                            Immediate investigation required to understand root causes and determine corrective action."
+                            "wRVU declining faster than tRVU indicates case mix shift toward lower-complexity work. 
+                            Combined with 16-point underperformance vs PAMF average, immediate investigation required. However we are looking into baseline data which could be the root cause of this sudden drop."
                         </div>
                         <div class="quote-author">
-                            - Customer Success Team Analysis
+                            - Enterprise/CS Team Analysis
                         </div>
                     </div>
                     
@@ -745,10 +1075,12 @@
                 <!-- Alert Boxes -->
                 <div class="alert-boxes">
                     <div class="alert-box">
-                        <h3>Oncology Dilemma</h3>
+                        <h3>Oncology Analysis</h3>
                         <div class="alert-number">-38.6%</div>
                         <div class="alert-desc">wRVU decline (Aug vs Aug)</div>
                         <div class="alert-detail">16 pts worse than PAMF average</div>
+                        <div class="alert-detail"></div>
+                        <div class="alert-detail">Looking into baseline data as cause for drop</div>
                     </div>
                     
                     <div class="alert-box orange">
@@ -780,6 +1112,12 @@
                                 <td class="right">10,335</td>
                                 <td class="right" style="color: #dc2626; font-weight: 600;">6,349</td>
                                 <td class="right" style="color: #dc2626; font-weight: 600;">-3,986</td>
+                            </tr>
+                            <tr style="background: #d1fae5;">
+                                <td><strong>Monthly tRVUs</strong></td>
+                                <td class="right">31,929</td>
+                                <td class="right" style="color: #dc2626; font-weight: 600;">22,110</td>
+                                <td class="right" style="color: #dc2626; font-weight: 600;">-9,819</td>
                             </tr>
                             <tr>
                                 <td><strong>Revenue per wRVU</strong></td>
@@ -817,10 +1155,9 @@
                                 <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
                             </svg>
                             <div>
-                                <strong>Critical Alert:</strong> These 17 Oncology providers using Augmedix Live show a <strong>-38.6% productivity decline</strong>, 
-                                performing <strong>16.1 points worse</strong> than the overall PAMF average of -22.5%. This represents a 
-                                <strong>-$494,032 monthly net revenue loss</strong> (-42.7%) after Augmedix costs. 
-                                <strong style="display: block; margin-top: 0.5rem;">Root cause investigation and immediate intervention required. Keep in mind baseline numbers are being reviewed which could be the root cause of the issue.</strong>
+                                <strong>Critical Alert:</strong> Work RVU declining 7.8 points faster than Total RVU indicates case mix shift. 
+                                These 17 Oncology providers show <strong>-38.6% wRVU decline</strong>, performing <strong>16.1 points worse</strong> 
+                                than PAMF average. Monthly net revenue loss: <strong>-$494,032</strong> (-42.7%) after Augmedix costs.
                             </div>
                         </div>
                     </div>
@@ -836,10 +1173,10 @@
                             Critical Actions
                         </div>
                         <div class="action-list red">
-                            • Identify why 2 providers at zero output<br>
-                            • Interview 9 declining providers<br>
+                            • LOOK INTO UNDERLYING BASELINE data. This is the most important and most likely root cause for the "decrease" in RVUs<br>
                             • Compare to non-Augmedix oncologists<br>
-                            • Review product issues/support tickets
+                            • Analyze CPT code distribution (case mix)<br>
+                            • Review wRVU vs tRVU divergence causes
                         </div>
                     </div>
                     
@@ -851,10 +1188,10 @@
                             Bright Spots (4 growing)
                         </div>
                         <div class="action-list green">
-                            • McLain: +255% growth<br>
-                            • Dutton: +48% growth<br>
+                            • McLain: +255% wRVU growth<br>
+                            • Dutton: +48% wRVU growth<br>
                             • Chart closure: -49% improvement<br>
-                            • Learn from successful users
+                            • tRVU YTD actually up 5.3%
                         </div>
                     </div>
                 </div>
@@ -863,7 +1200,7 @@
         
         <!-- Provider Breakdown -->
         <div class="provider-breakdown">
-            <h3>Provider-Level Performance Breakdown</h3>
+            <h3>Provider-Level Performance Breakdown (wRVU Changes)</h3>
             
             <div class="provider-grid">
                 <div class="provider-category growing">
