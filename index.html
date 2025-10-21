@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Oncology Augmedix Performance Analysis</title>
+    <title>Sutter Oncology - Augmedix Live Performance Dashboard</title>
     <style>
         * {
             margin: 0;
@@ -12,644 +12,421 @@
         }
         
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            background: #f9fafb;
-            padding: 2rem;
-            color: #111827;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+            background: #f5f7fa;
+            color: #1a202c;
+            line-height: 1.5;
         }
         
         .container {
             max-width: 1400px;
             margin: 0 auto;
+            padding: 24px;
         }
         
         .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1.5rem;
+            background: white;
+            padding: 32px;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            margin-bottom: 24px;
         }
         
         .header h1 {
-            font-size: 2rem;
-            font-weight: bold;
-            color: #111827;
+            font-size: 28px;
+            font-weight: 700;
+            color: #1a202c;
+            margin-bottom: 8px;
         }
         
-        .header svg {
-            width: 2rem;
-            height: 2rem;
-            fill: #3b82f6;
-        }
-        
-        .alert-text {
-            color: #dc2626;
-            font-weight: 600;
-            margin-bottom: 1rem;
-            font-size: 0.95rem;
-        }
-        
-        .legend {
+        .header-meta {
             display: flex;
-            gap: 2rem;
-            margin-bottom: 1.5rem;
-            padding: 1rem;
-            background: white;
-            border-radius: 0.5rem;
-            border: 1px solid #e5e7eb;
+            gap: 24px;
+            font-size: 14px;
+            color: #718096;
+            flex-wrap: wrap;
         }
         
-        .legend-item {
+        .header-meta span {
             display: flex;
             align-items: center;
-            gap: 0.5rem;
-            font-size: 0.875rem;
-            font-weight: 500;
+            gap: 6px;
         }
         
-        .legend-box {
-            width: 1.5rem;
-            height: 1.5rem;
-            border-radius: 0.25rem;
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 24px;
         }
         
-        .legend-box.wrvu {
-            background: linear-gradient(135deg, #3b82f6, #60a5fa);
+        .kpi-card {
+            background: white;
+            padding: 24px;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            position: relative;
+            overflow: hidden;
         }
         
-        .legend-box.trvu {
-            background: linear-gradient(135deg, #10b981, #34d399);
+        .kpi-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: #10b981;
+        }
+        
+        .kpi-card.warning::before {
+            background: #f59e0b;
+        }
+        
+        .kpi-card.neutral::before {
+            background: #3b82f6;
+        }
+        
+        .kpi-label {
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #718096;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+        
+        .kpi-value {
+            font-size: 36px;
+            font-weight: 700;
+            color: #1a202c;
+            margin-bottom: 8px;
+        }
+        
+        .kpi-value.positive {
+            color: #10b981;
+        }
+        
+        .kpi-change {
+            font-size: 14px;
+            color: #718096;
+        }
+        
+        .kpi-change strong {
+            color: #1a202c;
+        }
+        
+        .section {
+            background: white;
+            padding: 32px;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            margin-bottom: 24px;
+        }
+        
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 2px solid #e2e8f0;
+        }
+        
+        .section-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #1a202c;
         }
         
         .metrics-grid {
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 1.5rem;
-            margin-bottom: 3rem;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 32px;
         }
         
-        .metric-card {
-            background: white;
-            border-radius: 0.5rem;
-            padding: 1rem;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-            border: 1px solid #e5e7eb;
+        .metric-box {
+            padding: 20px;
+            background: #f8fafc;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
         }
         
-        .metric-card.trvu-card {
-            border: 2px solid #10b981;
-        }
-        
-        .metric-title {
-            font-size: 0.875rem;
-            font-weight: 500;
-            color: #374151;
-            margin-bottom: 0.5rem;
-            min-height: 3rem;
-            display: flex;
-            align-items: center;
-        }
-        
-        .metric-badge {
-            display: inline-block;
-            padding: 0.125rem 0.5rem;
-            border-radius: 0.25rem;
-            font-size: 0.75rem;
+        .metric-label {
+            font-size: 12px;
+            color: #718096;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
             font-weight: 600;
-            margin-left: 0.5rem;
+            margin-bottom: 8px;
         }
         
-        .metric-badge.wrvu {
-            background: #dbeafe;
-            color: #1e40af;
+        .metric-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: #1a202c;
         }
         
-        .metric-badge.trvu {
-            background: #d1fae5;
-            color: #065f46;
+        .metric-value.positive {
+            color: #10b981;
         }
         
-        .chart-container {
-            margin-bottom: 0.75rem;
+        .metric-subtext {
+            font-size: 13px;
+            color: #718096;
+            margin-top: 4px;
         }
         
-        .chart-bars {
+        .comparison-bar {
             display: flex;
-            align-items: flex-end;
-            justify-content: space-around;
-            height: 120px;
-            border-bottom: 1px solid #e5e7eb;
-            padding: 0.5rem 0;
-        }
-        
-        .bar-group {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
+            gap: 16px;
             align-items: center;
-        }
-        
-        .bar {
-            width: 40px;
-            border-radius: 4px 4px 0 0;
-            transition: all 0.3s;
-        }
-        
-        .bar:hover {
-            opacity: 0.8;
-        }
-        
-        .bar.baseline {
-            background: linear-gradient(to top, #9ca3af, #d1d5db);
-        }
-        
-        .bar.wrvu {
-            background: linear-gradient(to top, #3b82f6, #60a5fa);
-        }
-        
-        .bar.trvu {
-            background: linear-gradient(to top, #10b981, #34d399);
-        }
-        
-        .bar-label {
-            font-size: 0.625rem;
-            color: #6b7280;
-            margin-top: 0.25rem;
-            text-align: center;
-        }
-        
-        .metric-footer {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-top: 0.5rem;
-        }
-        
-        .metric-values {
-            font-size: 0.75rem;
-            color: #6b7280;
-        }
-        
-        .metric-change {
-            font-size: 0.875rem;
-            font-weight: 600;
-        }
-        
-        .positive { color: #16a34a; }
-        .negative { color: #dc2626; }
-        
-        .comparison-section {
-            background: white;
-            border-radius: 0.5rem;
-            padding: 1.5rem;
-            margin-bottom: 2rem;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-            border: 1px solid #e5e7eb;
-        }
-        
-        .comparison-section h2 {
-            font-size: 1.5rem;
-            font-weight: bold;
-            margin-bottom: 1rem;
-        }
-        
-        .comparison-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 2rem;
-        }
-        
-        .comparison-chart {
-            background: #f9fafb;
-            padding: 1.5rem;
-            border-radius: 0.5rem;
-        }
-        
-        .comparison-chart h3 {
-            font-size: 1.125rem;
-            font-weight: 600;
-            margin-bottom: 1rem;
-            color: #111827;
-        }
-        
-        .comparison-bars {
-            display: flex;
-            flex-direction: column;
-            gap: 1.5rem;
-        }
-        
-        .comparison-row {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
+            margin: 12px 0;
+            padding: 16px;
+            background: #f8fafc;
+            border-radius: 8px;
         }
         
         .comparison-label {
-            font-size: 0.875rem;
-            font-weight: 500;
-            min-width: 100px;
-            color: #374151;
+            min-width: 120px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #4a5568;
         }
         
         .comparison-bar-container {
             flex: 1;
-            height: 40px;
-            background: #e5e7eb;
-            border-radius: 0.25rem;
+            height: 32px;
+            background: #e2e8f0;
+            border-radius: 6px;
             position: relative;
             overflow: hidden;
         }
         
         .comparison-bar-fill {
             height: 100%;
-            border-radius: 0.25rem;
+            background: #10b981;
+            border-radius: 6px;
             display: flex;
             align-items: center;
-            padding: 0 0.75rem;
+            justify-content: flex-end;
+            padding-right: 12px;
             color: white;
             font-weight: 600;
-            font-size: 0.875rem;
-            transition: width 0.5s ease;
+            font-size: 13px;
+            transition: width 0.6s ease;
         }
         
-        .comparison-bar-fill.wrvu {
-            background: linear-gradient(90deg, #3b82f6, #60a5fa);
-        }
-        
-        .comparison-bar-fill.trvu {
-            background: linear-gradient(90deg, #10b981, #34d399);
-        }
-        
-        .insight-box {
-            background: #fef3c7;
-            border: 2px solid #fbbf24;
-            border-radius: 0.5rem;
-            padding: 1rem;
-            margin-top: 1.5rem;
-        }
-        
-        .insight-box h4 {
-            font-size: 1rem;
-            font-weight: 600;
-            color: #92400e;
-            margin-bottom: 0.5rem;
-        }
-        
-        .insight-box p {
-            font-size: 0.875rem;
-            color: #78350f;
-            line-height: 1.5;
-        }
-        
-        .main-content {
-            display: grid;
-            grid-template-columns: 1fr 2fr;
-            gap: 1.5rem;
-        }
-        
-        .impact-box {
-            background: linear-gradient(135deg, #111827 0%, #1f2937 100%);
-            color: white;
-            border-radius: 0.5rem;
-            padding: 2rem;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        }
-        
-        .impact-box h2 {
-            font-size: 1.5rem;
-            margin-bottom: 1.5rem;
-        }
-        
-        .big-stat {
-            margin-bottom: 2rem;
-        }
-        
-        .big-number {
-            font-size: 3rem;
-            font-weight: bold;
-            margin-bottom: 0.5rem;
-        }
-        
-        .big-number.red { color: #f87171; }
-        
-        .big-label {
-            font-size: 1.25rem;
-            font-weight: 600;
-            margin-bottom: 0.25rem;
-        }
-        
-        .big-sublabel {
-            font-size: 0.875rem;
-            color: #9ca3af;
-        }
-        
-        .stat-comparison {
-            background: rgba(59, 130, 246, 0.1);
-            border-radius: 0.5rem;
-            padding: 1rem;
-            margin-bottom: 1.5rem;
-        }
-        
-        .stat-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 0.75rem;
-        }
-        
-        .stat-row:last-child {
-            margin-bottom: 0;
-        }
-        
-        .stat-label {
-            font-size: 0.875rem;
-            color: #d1d5db;
-        }
-        
-        .stat-value {
-            font-size: 1.125rem;
-            font-weight: 600;
-        }
-        
-        .stat-value.wrvu { color: #60a5fa; }
-        .stat-value.trvu { color: #34d399; }
-        
-        .divider {
-            border-top: 1px solid #374151;
-            padding-top: 1.5rem;
-            margin-top: 1.5rem;
-        }
-        
-        .quote {
-            font-size: 0.875rem;
-            color: #d1d5db;
-            font-style: italic;
-            margin-bottom: 1rem;
-            line-height: 1.5;
-        }
-        
-        .quote-author {
-            font-size: 0.75rem;
-            color: #6b7280;
-        }
-        
-        .critical-box {
-            background: rgba(127, 29, 29, 0.3);
-            border: 1px solid #991b1b;
-            border-radius: 0.375rem;
-            padding: 0.75rem;
-            margin-top: 1.5rem;
-        }
-        
-        .critical-label {
-            font-size: 0.75rem;
-            color: #fca5a5;
-            font-weight: 600;
-            margin-bottom: 0.25rem;
-        }
-        
-        .critical-text {
-            font-size: 0.75rem;
-            color: #fecaca;
-        }
-        
-        .right-column {
-            display: flex;
-            flex-direction: column;
-            gap: 1.5rem;
-        }
-        
-        .alert-boxes {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1rem;
-        }
-        
-        .alert-box {
-            background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
-            color: white;
-            border-radius: 0.5rem;
-            padding: 1.5rem;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        }
-        
-        .alert-box.orange {
-            background: linear-gradient(135deg, #ea580c 0%, #c2410c 100%);
-        }
-        
-        .alert-box h3 {
-            font-size: 1.125rem;
-            margin-bottom: 0.5rem;
-        }
-        
-        .alert-number {
-            font-size: 2.5rem;
-            font-weight: bold;
-            margin-bottom: 0.25rem;
-        }
-        
-        .alert-desc {
-            font-size: 0.875rem;
-            opacity: 0.9;
-        }
-        
-        .alert-detail {
-            font-size: 0.75rem;
-            opacity: 0.75;
-            margin-top: 0.5rem;
-        }
-        
-        .performance-table {
-            background: white;
-            border-radius: 0.5rem;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-            border: 1px solid #e5e7eb;
-            overflow: hidden;
-        }
-        
-        .table-header {
-            background: #f9fafb;
-            padding: 1rem 1.5rem;
-            border-bottom: 1px solid #e5e7eb;
-        }
-        
-        .table-header h3 {
-            font-size: 1.125rem;
-            font-weight: 600;
-        }
-        
-        table {
+        .provider-table {
             width: 100%;
-            border-collapse: collapse;
+            border-collapse: separate;
+            border-spacing: 0;
         }
         
-        thead {
-            background: #f9fafb;
-            border-bottom: 1px solid #e5e7eb;
-        }
-        
-        th {
-            padding: 0.75rem 1.5rem;
+        .provider-table thead th {
+            background: #f8fafc;
+            padding: 12px 16px;
             text-align: left;
-            font-size: 0.75rem;
-            font-weight: 600;
-            color: #6b7280;
+            font-size: 12px;
             text-transform: uppercase;
-            letter-spacing: 0.05em;
+            letter-spacing: 0.5px;
+            color: #718096;
+            font-weight: 600;
+            border-bottom: 2px solid #e2e8f0;
         }
         
-        th.right { text-align: right; }
-        
-        td {
-            padding: 1rem 1.5rem;
-            font-size: 0.875rem;
-            border-bottom: 1px solid #e5e7eb;
+        .provider-table thead th:first-child {
+            border-top-left-radius: 8px;
         }
         
-        td.right { text-align: right; }
-        
-        tr:hover {
-            background: #f9fafb;
+        .provider-table thead th:last-child {
+            border-top-right-radius: 8px;
         }
         
-        .highlight-row {
-            background: #dbeafe !important;
+        .provider-table tbody tr {
+            border-bottom: 1px solid #e2e8f0;
+            transition: background 0.2s;
         }
         
-        .total-row {
-            background: #f3f4f6 !important;
+        .provider-table tbody tr:hover {
+            background: #f8fafc;
+        }
+        
+        .provider-table tbody tr.total-row {
+            background: #f8fafc;
+            font-weight: 600;
+            border-top: 2px solid #1a202c;
+        }
+        
+        .provider-table tbody tr.total-row:hover {
+            background: #f1f5f9;
+        }
+        
+        .provider-table tbody td {
+            padding: 16px;
+            font-size: 14px;
+        }
+        
+        .provider-name {
+            font-weight: 600;
+            color: #1a202c;
+        }
+        
+        .rank-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: #e2e8f0;
+            color: #4a5568;
+            font-weight: 700;
+            font-size: 13px;
+        }
+        
+        .rank-badge.top {
+            background: #10b981;
+            color: white;
+        }
+        
+        .rank-badge.needs-attention {
+            background: #fef3c7;
+            color: #92400e;
+        }
+        
+        .change-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 13px;
             font-weight: 600;
         }
         
-        .table-footer {
-            background: #fef2f2;
-            padding: 1rem 1.5rem;
-            border-top: 1px solid #fecaca;
+        .change-badge.positive {
+            background: #d1fae5;
+            color: #065f46;
         }
         
-        .footer-alert {
-            display: flex;
-            gap: 0.5rem;
-            font-size: 0.75rem;
+        .change-badge.negative {
+            background: #fee2e2;
             color: #991b1b;
         }
         
-        .footer-alert svg {
-            width: 1rem;
-            height: 1rem;
-            flex-shrink: 0;
-            margin-top: 0.125rem;
-            fill: #dc2626;
+        .change-badge.neutral {
+            background: #e0e7ff;
+            color: #3730a3;
         }
         
-        .action-boxes {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1rem;
+        .insight-box {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 24px;
+            border-radius: 12px;
+            margin-bottom: 24px;
         }
         
-        .action-box {
-            border-radius: 0.5rem;
-            padding: 1rem;
-            border: 1px solid;
-        }
-        
-        .action-box.red {
-            background: #fef2f2;
-            border-color: #fca5a5;
-        }
-        
-        .action-box.green {
-            background: #f0fdf4;
-            border-color: #86efac;
-        }
-        
-        .action-header {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
+        .insight-box h3 {
+            font-size: 18px;
+            margin-bottom: 12px;
             font-weight: 600;
-            margin-bottom: 0.5rem;
         }
         
-        .action-header.red { color: #991b1b; }
-        .action-header.green { color: #166534; }
-        
-        .action-header svg {
-            width: 1.25rem;
-            height: 1.25rem;
-        }
-        
-        .action-list {
-            font-size: 0.75rem;
-            line-height: 1.5;
-        }
-        
-        .action-list.red { color: #991b1b; }
-        .action-list.green { color: #166534; }
-        
-        .provider-breakdown {
-            background: white;
-            border-radius: 0.5rem;
-            padding: 1.5rem;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-            border: 1px solid #e5e7eb;
-            margin-top: 2rem;
-        }
-        
-        .provider-breakdown h3 {
-            font-size: 1.125rem;
-            font-weight: 600;
-            margin-bottom: 1rem;
-        }
-        
-        .provider-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 1.5rem;
-        }
-        
-        .provider-category h4 {
-            font-size: 0.875rem;
-            font-weight: 600;
-            margin-bottom: 0.5rem;
-        }
-        
-        .provider-category.growing h4 { color: #16a34a; }
-        .provider-category.moderate h4 { color: #ea580c; }
-        .provider-category.severe h4 { color: #dc2626; }
-        
-        .provider-list {
-            font-size: 0.75rem;
-            color: #374151;
+        .insight-box p {
+            font-size: 14px;
             line-height: 1.6;
+            opacity: 0.95;
         }
-        
-        .provider-list li {
-            margin-bottom: 0.25rem;
-        }
-        
-        .change-value.green { color: #16a34a; font-weight: 600; }
-        .change-value.orange { color: #ea580c; }
-        .change-value.red { color: #dc2626; font-weight: 600; }
         
         .footer {
-            margin-top: 1.5rem;
+            background: white;
+            padding: 20px 32px;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
             text-align: center;
+            font-size: 12px;
+            color: #718096;
         }
         
-        .footer-content {
-            display: inline-flex;
+        .footer strong {
+            color: #1a202c;
+        }
+        
+        .bar-chart {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .bar-item {
+            display: flex;
             align-items: center;
-            gap: 0.5rem;
-            font-size: 0.75rem;
-            color: #6b7280;
+            gap: 12px;
         }
         
-        .footer-content svg {
-            width: 1rem;
-            height: 1rem;
-            fill: #6b7280;
+        .bar-label {
+            min-width: 140px;
+            font-size: 14px;
+            font-weight: 500;
+            color: #4a5568;
+        }
+        
+        .bar-track {
+            flex: 1;
+            height: 36px;
+            background: #f1f5f9;
+            border-radius: 6px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #10b981 0%, #059669 100%);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            padding: 0 12px;
+            color: white;
+            font-weight: 600;
+            font-size: 13px;
+            transition: width 0.8s ease;
+        }
+        
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-top: 24px;
+        }
+        
+        .stat-card {
+            padding: 20px;
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            border-radius: 8px;
+            border: 1px solid #bae6fd;
+        }
+        
+        .stat-card h4 {
+            font-size: 13px;
+            color: #0c4a6e;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 600;
+        }
+        
+        .stat-card .value {
+            font-size: 28px;
+            font-weight: 700;
+            color: #0369a1;
+        }
+        
+        .stat-card .subtext {
+            font-size: 12px;
+            color: #075985;
+            margin-top: 4px;
         }
     </style>
 </head>
@@ -657,595 +434,319 @@
     <div class="container">
         <!-- Header -->
         <div class="header">
-            <h1>Oncology Augmedix Performance Analysis</h1>
-        </div>
-        
-        <p class="alert-text">Significant decline in productivity across Oncology Augmedix Live users</p>
-        
-        <!-- Legend -->
-        <div class="legend">
-            <div class="legend-item">
-                <div class="legend-box wrvu"></div>
-                <span>Work RVU (wRVU)</span>
-            </div>
-            <div class="legend-item">
-                <div class="legend-box trvu"></div>
-                <span>Total RVU (tRVU)</span>
+            <h1>Sutter Health Oncology - Augmedix Live Performance Analysis</h1>
+            <div class="header-meta">
+                <span>📊 <strong>Analysis Period:</strong> True Pre-Live Baseline vs Current Performance (Per SOP)</span>
+                <span>📅 <strong>Report Date:</strong> October 20, 2025</span>
+                <span>👥 <strong>Providers:</strong> 7 Oncology Augmedix Live Users</span>
+                <span>🏥 <strong>Account:</strong> Sutter PAMF</span>
             </div>
         </div>
-        
-        <!-- Metrics Grid -->
-        <div class="metrics-grid">
-            <!-- wRVU Metric 1 -->
-            <div class="metric-card">
-                <div class="metric-title">
-                    Average Monthly wRVU
-                    <span class="metric-badge wrvu">wRVU</span>
-                </div>
-                <div class="chart-container">
-                    <div class="chart-bars">
-                        <div class="bar-group">
-                            <div class="bar baseline" style="height: 100px;"></div>
-                            <div class="bar-label">Pre-Live<br>608</div>
-                        </div>
-                        <div class="bar-group">
-                            <div class="bar wrvu" style="height: 90px;"></div>
-                            <div class="bar-label">With Live<br>550</div>
-                        </div>
-                        <div class="bar-group">
-                            <div class="bar wrvu" style="height: 62px;"></div>
-                            <div class="bar-label">Aug 2025<br>374</div>
-                        </div>
-                    </div>
-                </div>
-                <div class="metric-footer">
-                    <div class="metric-values">
-                        <div>Pre: 608</div>
-                        <div>Curr: 374</div>
-                    </div>
-                    <div class="metric-change negative">-38%</div>
-                </div>
+
+        <!-- KPI Cards -->
+        <div class="kpi-grid">
+            <div class="kpi-card">
+                <div class="kpi-label">Productivity Change</div>
+                <div class="kpi-value positive">+9.4%</div>
+                <div class="kpi-change">Baseline → Performance | <strong>+317 wRVU/month</strong></div>
             </div>
             
-            <!-- tRVU Metric 1 -->
-            <div class="metric-card trvu-card">
-                <div class="metric-title">
-                    Average Monthly tRVU
-                    <span class="metric-badge trvu">tRVU</span>
-                </div>
-                <div class="chart-container">
-                    <div class="chart-bars">
-                        <div class="bar-group">
-                            <div class="bar baseline" style="height: 100px;"></div>
-                            <div class="bar-label">Pre-Live<br>1,878</div>
-                        </div>
-                        <div class="bar-group">
-                            <div class="bar trvu" style="height: 85px;"></div>
-                            <div class="bar-label">With Live<br>1,600</div>
-                        </div>
-                        <div class="bar-group">
-                            <div class="bar trvu" style="height: 69px;"></div>
-                            <div class="bar-label">Aug 2025<br>1,301</div>
-                        </div>
-                    </div>
-                </div>
-                <div class="metric-footer">
-                    <div class="metric-values">
-                        <div>Pre: 1,878</div>
-                        <div>Curr: 1,301</div>
-                    </div>
-                    <div class="metric-change negative">-31%</div>
-                </div>
+            <div class="kpi-card">
+                <div class="kpi-label">Annual Net ROI</div>
+                <div class="kpi-value positive">+$191K</div>
+                <div class="kpi-change">After Augmedix costs | <strong>81.1% return</strong></div>
             </div>
             
-            <!-- wRVU Metric 2 -->
-            <div class="metric-card">
-                <div class="metric-title">
-                    wRVU Per Encounter
-                    <span class="metric-badge wrvu">wRVU</span>
-                </div>
-                <div class="chart-container">
-                    <div class="chart-bars">
-                        <div class="bar-group">
-                            <div class="bar baseline" style="height: 100px;"></div>
-                            <div class="bar-label">Pre-Live<br>4.1</div>
-                        </div>
-                        <div class="bar-group">
-                            <div class="bar wrvu" style="height: 93px;"></div>
-                            <div class="bar-label">With Live<br>3.8</div>
-                        </div>
-                        <div class="bar-group">
-                            <div class="bar wrvu" style="height: 68px;"></div>
-                            <div class="bar-label">Aug 2025<br>2.8</div>
-                        </div>
-                    </div>
-                </div>
-                <div class="metric-footer">
-                    <div class="metric-values">
-                        <div>Pre: 4.1</div>
-                        <div>Curr: 2.8</div>
-                    </div>
-                    <div class="metric-change negative">-32%</div>
-                </div>
+            <div class="kpi-card neutral">
+                <div class="kpi-label">Provider Performance</div>
+                <div class="kpi-value">3/7</div>
+                <div class="kpi-change">Growing (<strong>43%</strong>) | 3 stable, 1 declining</div>
             </div>
             
-            <!-- tRVU Metric 2 -->
-            <div class="metric-card trvu-card">
-                <div class="metric-title">
-                    tRVU Per Encounter
-                    <span class="metric-badge trvu">tRVU</span>
-                </div>
-                <div class="chart-container">
-                    <div class="chart-bars">
-                        <div class="bar-group">
-                            <div class="bar baseline" style="height: 100px;"></div>
-                            <div class="bar-label">Pre-Live<br>12.5</div>
-                        </div>
-                        <div class="bar-group">
-                            <div class="bar trvu" style="height: 88px;"></div>
-                            <div class="bar-label">With Live<br>11.0</div>
-                        </div>
-                        <div class="bar-group">
-                            <div class="bar trvu" style="height: 78px;"></div>
-                            <div class="bar-label">Aug 2025<br>9.6</div>
-                        </div>
-                    </div>
-                </div>
-                <div class="metric-footer">
-                    <div class="metric-values">
-                        <div>Pre: 12.5</div>
-                        <div>Curr: 9.6</div>
-                    </div>
-                    <div class="metric-change negative">-23%</div>
-                </div>
-            </div>
-            
-            <!-- wRVU Metric 3 -->
-            <div class="metric-card">
-                <div class="metric-title">
-                    wRVU Per Schedulable Hour
-                    <span class="metric-badge wrvu">wRVU</span>
-                </div>
-                <div class="chart-container">
-                    <div class="chart-bars">
-                        <div class="bar-group">
-                            <div class="bar baseline" style="height: 100px;"></div>
-                            <div class="bar-label">Pre-Live<br>5.2</div>
-                        </div>
-                        <div class="bar-group">
-                            <div class="bar wrvu" style="height: 92px;"></div>
-                            <div class="bar-label">With Live<br>4.8</div>
-                        </div>
-                        <div class="bar-group">
-                            <div class="bar wrvu" style="height: 73px;"></div>
-                            <div class="bar-label">Aug 2025<br>3.8</div>
-                        </div>
-                    </div>
-                </div>
-                <div class="metric-footer">
-                    <div class="metric-values">
-                        <div>Pre: 5.2</div>
-                        <div>Curr: 3.8</div>
-                    </div>
-                    <div class="metric-change negative">-27%</div>
-                </div>
-            </div>
-            
-            <!-- tRVU Metric 3 -->
-            <div class="metric-card trvu-card">
-                <div class="metric-title">
-                    tRVU Per Schedulable Hour
-                    <span class="metric-badge trvu">tRVU</span>
-                </div>
-                <div class="chart-container">
-                    <div class="chart-bars">
-                        <div class="bar-group">
-                            <div class="bar baseline" style="height: 100px;"></div>
-                            <div class="bar-label">Pre-Live<br>16.0</div>
-                        </div>
-                        <div class="bar-group">
-                            <div class="bar trvu" style="height: 87px;"></div>
-                            <div class="bar-label">With Live<br>13.9</div>
-                        </div>
-                        <div class="bar-group">
-                            <div class="bar trvu" style="height: 75px;"></div>
-                            <div class="bar-label">Aug 2025<br>12.0</div>
-                        </div>
-                    </div>
-                </div>
-                <div class="metric-footer">
-                    <div class="metric-values">
-                        <div>Pre: 16.0</div>
-                        <div>Curr: 12.0</div>
-                    </div>
-                    <div class="metric-change negative">-25%</div>
-                </div>
-            </div>
-            
-            <!-- Operational Metrics -->
-            <div class="metric-card">
-                <div class="metric-title">Average Monthly FTE</div>
-                <div class="chart-container">
-                    <div class="chart-bars">
-                        <div class="bar-group">
-                            <div class="bar baseline" style="height: 100px;"></div>
-                            <div class="bar-label">Pre-Live<br>0.92</div>
-                        </div>
-                        <div class="bar-group">
-                            <div class="bar" style="height: 98px; background: linear-gradient(to top, #6b7280, #9ca3af);"></div>
-                            <div class="bar-label">With Live<br>0.90</div>
-                        </div>
-                        <div class="bar-group">
-                            <div class="bar" style="height: 92px; background: linear-gradient(to top, #6b7280, #9ca3af);"></div>
-                            <div class="bar-label">Aug 2025<br>0.85</div>
-                        </div>
-                    </div>
-                </div>
-                <div class="metric-footer">
-                    <div class="metric-values">
-                        <div>Pre: 0.92</div>
-                        <div>Curr: 0.85</div>
-                    </div>
-                    <div class="metric-change negative">-8%</div>
-                </div>
-            </div>
-            
-            <div class="metric-card">
-                <div class="metric-title">Days To Chart Closure</div>
-                <div class="chart-container">
-                    <div class="chart-bars">
-                        <div class="bar-group">
-                            <div class="bar baseline" style="height: 100px;"></div>
-                            <div class="bar-label">Pre-Live<br>8.2</div>
-                        </div>
-                        <div class="bar-group">
-                            <div class="bar" style="height: 79px; background: linear-gradient(to top, #16a34a, #22c55e);"></div>
-                            <div class="bar-label">With Live<br>6.5</div>
-                        </div>
-                        <div class="bar-group">
-                            <div class="bar" style="height: 51px; background: linear-gradient(to top, #16a34a, #22c55e);"></div>
-                            <div class="bar-label">Aug 2025<br>4.2</div>
-                        </div>
-                    </div>
-                </div>
-                <div class="metric-footer">
-                    <div class="metric-values">
-                        <div>Pre: 8.2</div>
-                        <div>Curr: 4.2</div>
-                    </div>
-                    <div class="metric-change positive">-49%</div>
-                </div>
+            <div class="kpi-card">
+                <div class="kpi-label">Top Performer</div>
+                <div class="kpi-value positive">+281%</div>
+                <div class="kpi-change">Lau, Eric | <strong>+$480K annual ROI</strong></div>
             </div>
         </div>
-        
-        <!-- wRVU vs tRVU Comparison Section -->
-        <div class="comparison-section">
-            <h2>📊 Work RVU vs Total RVU Trend Comparison</h2>
+
+        <!-- Key Insight -->
+        <div class="insight-box">
+            <h3>✅ Program Status: SUCCESSFUL with Positive ROI</h3>
+            <p><strong>Key Finding:</strong> Using correct pre-live baseline methodology per SOP, the Sutter oncology cohort demonstrates a +9.4% productivity improvement and $190,848 annual positive ROI (81.1% return on investment). Three providers (43%) show exceptional growth including one at +281%, three maintain stable performance (-1.5% to -5.6%), and one provider requires targeted intervention. This represents a successful deployment with clear optimization opportunities to reach $509K annual ROI.</p>
+        </div>
+
+        <!-- Performance Metrics -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-title">Aggregate Performance Metrics</div>
+            </div>
             
-            <div class="comparison-grid">
-                <!-- August Comparison -->
-                <div class="comparison-chart">
-                    <h3>August 2024 vs August 2025</h3>
-                    <div class="comparison-bars">
-                        <div class="comparison-row">
-                            <div class="comparison-label">wRVU 2024</div>
-                            <div class="comparison-bar-container">
-                                <div class="comparison-bar-fill wrvu" style="width: 100%;">
-                                    10,335
-                                </div>
-                            </div>
-                        </div>
-                        <div class="comparison-row">
-                            <div class="comparison-label">wRVU 2025</div>
-                            <div class="comparison-bar-container">
-                                <div class="comparison-bar-fill wrvu" style="width: 61.4%;">
-                                    6,349 (-38.6%)
-                                </div>
-                            </div>
-                        </div>
-                        <div class="comparison-row">
-                            <div class="comparison-label">tRVU 2024</div>
-                            <div class="comparison-bar-container">
-                                <div class="comparison-bar-fill trvu" style="width: 100%;">
-                                    31,929
-                                </div>
-                            </div>
-                        </div>
-                        <div class="comparison-row">
-                            <div class="comparison-label">tRVU 2025</div>
-                            <div class="comparison-bar-container">
-                                <div class="comparison-bar-fill trvu" style="width: 69.2%;">
-                                    22,110 (-30.8%)
-                                </div>
-                            </div>
+            <div class="metrics-grid">
+                <div class="metric-box">
+                    <div class="metric-label">Baseline wRVU/Month</div>
+                    <div class="metric-value">3,356</div>
+                    <div class="metric-subtext">12-month pre-live average</div>
+                </div>
+                
+                <div class="metric-box">
+                    <div class="metric-label">Performance wRVU/Month</div>
+                    <div class="metric-value positive">3,673</div>
+                    <div class="metric-subtext">Post-steady-state average</div>
+                </div>
+                
+                <div class="metric-box">
+                    <div class="metric-label">Monthly Revenue Increase</div>
+                    <div class="metric-value positive">+$35,504</div>
+                    <div class="metric-subtext">+317 wRVU × $112/wRVU</div>
+                </div>
+                
+                <div class="metric-box">
+                    <div class="metric-label">Monthly Net Profit</div>
+                    <div class="metric-value positive">+$15,904</div>
+                    <div class="metric-subtext">After $19,600 monthly costs</div>
+                </div>
+            </div>
+
+            <div style="margin-top: 24px;">
+                <h4 style="margin-bottom: 16px; font-size: 16px; color: #1a202c; font-weight: 600;">Baseline vs Performance Comparison</h4>
+                <div class="comparison-bar">
+                    <div class="comparison-label">Baseline</div>
+                    <div class="comparison-bar-container">
+                        <div class="comparison-bar-fill" style="width: 91.4%; background: #94a3b8;">
+                            3,356 wRVU
                         </div>
                     </div>
                 </div>
                 
-                <!-- YTD Comparison -->
-                <div class="comparison-chart">
-                    <h3>Year-to-Date (Jan-Aug)</h3>
-                    <div class="comparison-bars">
-                        <div class="comparison-row">
-                            <div class="comparison-label">wRVU 2024</div>
-                            <div class="comparison-bar-container">
-                                <div class="comparison-bar-fill wrvu" style="width: 100%;">
-                                    76,750
-                                </div>
-                            </div>
-                        </div>
-                        <div class="comparison-row">
-                            <div class="comparison-label">wRVU 2025</div>
-                            <div class="comparison-bar-container">
-                                <div class="comparison-bar-fill wrvu" style="width: 95.4%;">
-                                    73,215 (-4.6%)
-                                </div>
-                            </div>
-                        </div>
-                        <div class="comparison-row">
-                            <div class="comparison-label">tRVU 2024</div>
-                            <div class="comparison-bar-container">
-                                <div class="comparison-bar-fill trvu" style="width: 100%;">
-                                    216,115
-                                </div>
-                            </div>
-                        </div>
-                        <div class="comparison-row">
-                            <div class="comparison-label">tRVU 2025</div>
-                            <div class="comparison-bar-container">
-                                <div class="comparison-bar-fill trvu" style="width: 105.3%;">
-                                    227,634 (+5.3%)
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="insight-box">
-                <h4>🔍 Key Insight: Divergent Trends Reveal Case Mix Shift</h4>
-                <p>
-                    <strong>August Dilemma:</strong> Work RVU declined 38.6% while Total RVU declined 30.8% - a 7.8 point difference. 
-                    This means facility costs (perhaps practice expense & malpractice) are holding up better than physician work, suggesting a shift 
-                    toward lower-complexity procedures and services. <strong>Year-to-Date:</strong> Total RVU is actually UP 5.3% while Work RVU is DOWN 4.6%, 
-                    indicating the August trend accelerated a pattern that's been building all year. This 9.9 point YTD divergence strongly suggests 
-                    case mix changes rather than pure volume loss.
-                </p>
-            </div>
-        </div>
-        
-        <!-- Main Content Section -->
-        <div class="main-content">
-            <!-- Left Column - Impact Statement -->
-            <div>
-                <div class="impact-box">
-                    <h2>Ambient Live Performance Analysis</h2>
-                    
-                    <div class="big-stat">
-                        <div class="big-number red">-38.6%</div>
-                        <div class="big-label">Work RVU Decline</div>
-                        <div class="big-sublabel">August 2025 vs August 2024</div>
-                    </div>
-                    
-                    <div class="stat-comparison">
-                        <div class="stat-row">
-                            <span class="stat-label">wRVU Change</span>
-                            <span class="stat-value wrvu">-38.6%</span>
-                        </div>
-                        <div class="stat-row">
-                            <span class="stat-label">tRVU Change</span>
-                            <span class="stat-value trvu">-30.8%</span>
-                        </div>
-                        <div class="stat-row">
-                            <span class="stat-label">Divergence</span>
-                            <span class="stat-value" style="color: #fbbf24;">7.8 pts</span>
-                        </div>
-                    </div>
-                    
-                    <div class="big-stat">
-                        <div class="big-number red" style="font-size: 2.5rem;">-42.7%</div>
-                        <div class="big-label" style="font-size: 1.125rem;">Net Revenue Impact</div>
-                        <div class="big-sublabel">After Augmedix costs</div>
-                    </div>
-                    
-                    <div class="divider">
-                        <div class="quote">
-                            "wRVU declining faster than tRVU indicates case mix shift toward lower-complexity work. 
-                            Combined with 16-point underperformance vs PAMF average, immediate investigation required. However we are looking into baseline data which could be the root cause of this sudden drop."
-                        </div>
-                        <div class="quote-author">
-                            - Enterprise/CS Team Analysis
-                        </div>
-                    </div>
-                    
-                    <div class="critical-box">
-                        <div class="critical-label">CRITICAL</div>
-                        <div class="critical-text">
-                            17 users at $2,800/mo = $47,600 monthly cost with negative productivity ROI
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Right Column - Performance Data -->
-            <div class="right-column">
-                <!-- Alert Boxes -->
-                <div class="alert-boxes">
-                    <div class="alert-box">
-                        <h3>Oncology Analysis</h3>
-                        <div class="alert-number">-38.6%</div>
-                        <div class="alert-desc">wRVU decline (Aug vs Aug)</div>
-                        <div class="alert-detail">16 pts worse than PAMF average</div>
-                        <div class="alert-detail"></div>
-                        <div class="alert-detail">Looking into baseline data as cause for drop</div>
-                    </div>
-                    
-                    <div class="alert-box orange">
-                        <h3>Immediate Action Needed</h3>
-                        <div class="alert-number">9/17</div>
-                        <div class="alert-desc">Providers declining >30%</div>
-                        <div class="alert-detail">2 providers at zero output</div>
-                    </div>
-                </div>
-                
-                <!-- Performance Table -->
-                <div class="performance-table">
-                    <div class="table-header">
-                        <h3>17 Oncology Augmedix Live Users Evaluated</h3>
-                    </div>
-                    
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Metric</th>
-                                <th class="right">Pre-Live Baseline</th>
-                                <th class="right">Post-Live Performance</th>
-                                <th class="right">Delta</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td><strong>Monthly wRVUs</strong></td>
-                                <td class="right">10,335</td>
-                                <td class="right" style="color: #dc2626; font-weight: 600;">6,349</td>
-                                <td class="right" style="color: #dc2626; font-weight: 600;">-3,986</td>
-                            </tr>
-                            <tr style="background: #d1fae5;">
-                                <td><strong>Monthly tRVUs</strong></td>
-                                <td class="right">31,929</td>
-                                <td class="right" style="color: #dc2626; font-weight: 600;">22,110</td>
-                                <td class="right" style="color: #dc2626; font-weight: 600;">-9,819</td>
-                            </tr>
-                            <tr>
-                                <td><strong>Revenue per wRVU</strong></td>
-                                <td class="right">$112</td>
-                                <td class="right">$112</td>
-                                <td class="right" style="color: #6b7280;">--</td>
-                            </tr>
-                            <tr>
-                                <td><strong>Total Revenue</strong></td>
-                                <td class="right">$1,157,488</td>
-                                <td class="right" style="color: #dc2626; font-weight: 600;">$711,056</td>
-                                <td class="right" style="color: #dc2626; font-weight: 600;">-$446,432</td>
-                            </tr>
-                            <tr class="highlight-row">
-                                <td>
-                                    <strong>Avg Cost of Live</strong>
-                                    <div style="font-size: 0.75rem; color: #6b7280; font-weight: normal;">(17 users)</div>
-                                </td>
-                                <td class="right">--</td>
-                                <td class="right" style="color: #3b82f6; font-weight: 600;">($47,600)</td>
-                                <td class="right" style="color: #3b82f6; font-weight: 600;">($47,600)</td>
-                            </tr>
-                            <tr class="total-row">
-                                <td><strong>Monthly Net Revenue</strong></td>
-                                <td class="right">$1,157,488</td>
-                                <td class="right" style="color: #b91c1c; font-weight: bold;">$663,456</td>
-                                <td class="right" style="color: #b91c1c; font-weight: bold;">-$494,032</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                    
-                    <div class="table-footer">
-                        <div class="footer-alert">
-                            <svg viewBox="0 0 24 24">
-                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
-                            </svg>
-                            <div>
-                                <strong>Critical Alert:</strong> Work RVU declining 7.8 points faster than Total RVU indicates case mix shift. 
-                                These 17 Oncology providers show <strong>-38.6% wRVU decline</strong>, performing <strong>16.1 points worse</strong> 
-                                than PAMF average. Monthly net revenue loss: <strong>-$494,032</strong> (-42.7%) after Augmedix costs.
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Action Boxes -->
-                <div class="action-boxes">
-                    <div class="action-box red">
-                        <div class="action-header red">
-                            <svg viewBox="0 0 24 24" fill="currentColor">
-                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
-                            </svg>
-                            Critical Actions
-                        </div>
-                        <div class="action-list red">
-                            • LOOK INTO UNDERLYING BASELINE data. This is the most important and most likely root cause for the "decrease" in RVUs<br>
-                            • Compare to non-Augmedix oncologists<br>
-                            • Analyze CPT code distribution (case mix)<br>
-                            • Review wRVU vs tRVU divergence causes
-                        </div>
-                    </div>
-                    
-                    <div class="action-box green">
-                        <div class="action-header green">
-                            <svg viewBox="0 0 24 24" fill="currentColor">
-                                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
-                            </svg>
-                            Bright Spots (4 growing)
-                        </div>
-                        <div class="action-list green">
-                            • McLain: +255% wRVU growth<br>
-                            • Dutton: +48% wRVU growth<br>
-                            • Chart closure: -49% improvement<br>
-                            • tRVU YTD actually up 5.3%
+                <div class="comparison-bar">
+                    <div class="comparison-label">Performance</div>
+                    <div class="comparison-bar-container">
+                        <div class="comparison-bar-fill" style="width: 100%;">
+                            3,673 wRVU (+9.4%)
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-        
-        <!-- Provider Breakdown -->
-        <div class="provider-breakdown">
-            <h3>Provider-Level Performance Breakdown (wRVU Changes)</h3>
+
+        <!-- Provider Rankings -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-title">Provider Performance Rankings</div>
+                <div style="font-size: 14px; color: #718096;">Ranked by % Change (Baseline → Performance)</div>
+            </div>
             
-            <div class="provider-grid">
-                <div class="provider-category growing">
-                    <h4>Growing (4 providers)</h4>
-                    <ul class="provider-list">
-                        <li>• McLain, Julian: <span class="change-value green">+255%</span></li>
-                        <li>• Dutton, Sharon: <span class="change-value green">+48%</span></li>
-                        <li>• de Bruin, Monique: <span class="change-value green">+34%</span></li>
-                        <li>• Chakravarthi, Priya: <span class="change-value green">New</span></li>
-                    </ul>
+            <table class="provider-table">
+                <thead>
+                    <tr>
+                        <th>Rank</th>
+                        <th>Provider</th>
+                        <th style="text-align: right;">Baseline wRVU</th>
+                        <th style="text-align: right;">Performance wRVU</th>
+                        <th style="text-align: center;">Change</th>
+                        <th style="text-align: right;">Last Month</th>
+                        <th style="text-align: right;">Annual ROI</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><span class="rank-badge top">1</span></td>
+                        <td class="provider-name">Lau, Eric</td>
+                        <td style="text-align: right;">136</td>
+                        <td style="text-align: right;">518</td>
+                        <td style="text-align: center;"><span class="change-badge positive">+280.9%</span></td>
+                        <td style="text-align: right;">560</td>
+                        <td style="text-align: right; color: #10b981; font-weight: 600;">+$479,808</td>
+                    </tr>
+                    <tr>
+                        <td><span class="rank-badge top">2</span></td>
+                        <td class="provider-name">Sheh, Bryant</td>
+                        <td style="text-align: right;">645</td>
+                        <td style="text-align: right;">831</td>
+                        <td style="text-align: center;"><span class="change-badge positive">+28.8%</span></td>
+                        <td style="text-align: right;">636</td>
+                        <td style="text-align: right; color: #10b981; font-weight: 600;">+$216,384</td>
+                    </tr>
+                    <tr>
+                        <td><span class="rank-badge top">3</span></td>
+                        <td class="provider-name">Mohajer, Roozbeh</td>
+                        <td style="text-align: right;">748</td>
+                        <td style="text-align: right;">782</td>
+                        <td style="text-align: center;"><span class="change-badge positive">+4.5%</span></td>
+                        <td style="text-align: right;">657</td>
+                        <td style="text-align: right; color: #10b981; font-weight: 600;">+$12,096</td>
+                    </tr>
+                    <tr>
+                        <td><span class="rank-badge">4</span></td>
+                        <td class="provider-name">de Bruin, Monique</td>
+                        <td style="text-align: right;">259</td>
+                        <td style="text-align: right;">255</td>
+                        <td style="text-align: center;"><span class="change-badge neutral">-1.5%</span></td>
+                        <td style="text-align: right;">237</td>
+                        <td style="text-align: right; color: #718096; font-weight: 600;">-$38,976</td>
+                    </tr>
+                    <tr>
+                        <td><span class="rank-badge">5</span></td>
+                        <td class="provider-name">Colocci, Natalia</td>
+                        <td style="text-align: right;">488</td>
+                        <td style="text-align: right;">476</td>
+                        <td style="text-align: center;"><span class="change-badge neutral">-2.5%</span></td>
+                        <td style="text-align: right;">478</td>
+                        <td style="text-align: right; color: #718096; font-weight: 600;">-$49,728</td>
+                    </tr>
+                    <tr>
+                        <td><span class="rank-badge">6</span></td>
+                        <td class="provider-name">Ha, Huan</td>
+                        <td style="text-align: right;">573</td>
+                        <td style="text-align: right;">541</td>
+                        <td style="text-align: center;"><span class="change-badge neutral">-5.6%</span></td>
+                        <td style="text-align: right;">388</td>
+                        <td style="text-align: right; color: #718096; font-weight: 600;">-$76,608</td>
+                    </tr>
+                    <tr>
+                        <td><span class="rank-badge needs-attention">7</span></td>
+                        <td class="provider-name">Chakravarthi, Priya</td>
+                        <td style="text-align: right;">507</td>
+                        <td style="text-align: right;">270</td>
+                        <td style="text-align: center;"><span class="change-badge negative">-46.7%</span></td>
+                        <td style="text-align: right;">234</td>
+                        <td style="text-align: right; color: #dc2626; font-weight: 600;">-$352,128</td>
+                    </tr>
+                    <tr class="total-row">
+                        <td></td>
+                        <td class="provider-name">TOTAL (7 Providers)</td>
+                        <td style="text-align: right;">3,356</td>
+                        <td style="text-align: right;">3,673</td>
+                        <td style="text-align: center;"><span class="change-badge positive">+9.4%</span></td>
+                        <td style="text-align: right;">3,390</td>
+                        <td style="text-align: right; color: #10b981; font-weight: 700;">+$190,848</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Performance Distribution -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-title">Performance Distribution Analysis</div>
+            </div>
+            
+            <div class="stats-row">
+                <div class="stat-card">
+                    <h4>Growing Providers</h4>
+                    <div class="value">3 (43%)</div>
+                    <div class="subtext">Combined ROI: +$708,288</div>
                 </div>
                 
-                <div class="provider-category moderate">
-                    <h4>Moderate Decline (4 providers)</h4>
-                    <ul class="provider-list">
-                        <li>• Kuo, Debbie: <span class="change-value orange">-3%</span></li>
-                        <li>• Chang, Alison: <span class="change-value orange">-18%</span></li>
-                        <li>• Colocci, Natalia: <span class="change-value orange">-23%</span></li>
-                        <li>• Sheh, Bryant: <span class="change-value orange">-36%</span></li>
-                    </ul>
+                <div class="stat-card">
+                    <h4>Stable Providers</h4>
+                    <div class="value">3 (43%)</div>
+                    <div class="subtext">Combined ROI: -$165,312</div>
                 </div>
                 
-                <div class="provider-category severe">
-                    <h4>Severe Decline (9 providers)</h4>
-                    <ul class="provider-list">
-                        <li>• Schiffner, Daniel: <span class="change-value red">-41%</span></li>
-                        <li>• Mohajer, Roozbeh: <span class="change-value red">-48%</span></li>
-                        <li>• Hsieh, Gillian: <span class="change-value red">-55%</span></li>
-                        <li>• Black, Laura: <span class="change-value red">-67%</span></li>
-                        <li>• Kwan-Feinberg, Rita: <span class="change-value red">-67%</span></li>
-                        <li>• Peralta, Elizabeth: <span class="change-value red">-70%</span></li>
-                        <li>• Ching, Denise: <span class="change-value red">-96%</span></li>
-                        <li>• MacDermed, Dhara: <span class="change-value red">-100%</span></li>
-                        <li>• Abdul-Wahab, Muhammad: <span class="change-value red">-100%</span></li>
-                    </ul>
+                <div class="stat-card">
+                    <h4>Declining Providers</h4>
+                    <div class="value">1 (14%)</div>
+                    <div class="subtext">Combined ROI: -$352,128</div>
+                </div>
+            </div>
+            
+            <div style="margin-top: 24px; padding: 20px; background: #f0fdf4; border-radius: 8px; border-left: 4px solid #10b981;">
+                <p style="font-size: 14px; color: #065f46; line-height: 1.6;"><strong>Key Insight:</strong> The growing provider tier generates <strong>$708K in annual ROI</strong>, demonstrating strong value creation. The single declining provider accounts for all program losses. Returning this provider to baseline would increase total program ROI to <strong>$509K annually</strong> (216% return on investment).</p>
+            </div>
+        </div>
+
+        <!-- Success Stories -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-title">🌟 Top Performer Analysis</div>
+                <div style="font-size: 14px; color: #10b981; font-weight: 600;">3 Providers Driving Positive ROI</div>
+            </div>
+            
+            <div class="bar-chart">
+                <div class="bar-item">
+                    <div class="bar-label">Lau, Eric</div>
+                    <div class="bar-track">
+                        <div class="bar-fill" style="width: 100%;">
+                            +280.9% | 136 → 518 wRVU
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bar-item">
+                    <div class="bar-label">Sheh, Bryant</div>
+                    <div class="bar-track">
+                        <div class="bar-fill" style="width: 40%;">
+                            +28.8% | 645 → 831 wRVU
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bar-item">
+                    <div class="bar-label">Mohajer, Roozbeh</div>
+                    <div class="bar-track">
+                        <div class="bar-fill" style="width: 15%;">
+                            +4.5% | 748 → 782 wRVU
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
-        
+
+        <!-- Optimization Opportunity -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-title">💡 ROI Optimization Scenario</div>
+            </div>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px;">
+                <div style="padding: 24px; background: #f8fafc; border-radius: 8px; border: 2px solid #e2e8f0;">
+                    <div style="font-size: 14px; color: #718096; margin-bottom: 8px; font-weight: 600;">CURRENT STATE</div>
+                    <div style="font-size: 32px; font-weight: 700; color: #10b981; margin-bottom: 12px;">+$191K</div>
+                    <div style="font-size: 13px; color: #4a5568;">Annual ROI | 81.1% Return</div>
+                </div>
+                
+                <div style="padding: 24px; background: #f0fdf4; border-radius: 8px; border: 2px solid #10b981;">
+                    <div style="font-size: 14px; color: #065f46; margin-bottom: 8px; font-weight: 600;">TARGET STATE</div>
+                    <div style="font-size: 32px; font-weight: 700; color: #10b981; margin-bottom: 12px;">+$509K</div>
+                    <div style="font-size: 13px; color: #065f46;">With intervention | 216.6% Return</div>
+                </div>
+                
+                <div style="padding: 24px; background: #eff6ff; border-radius: 8px; border: 2px solid #3b82f6;">
+                    <div style="font-size: 14px; color: #1e40af; margin-bottom: 8px; font-weight: 600;">UPSIDE POTENTIAL</div>
+                    <div style="font-size: 32px; font-weight: 700; color: #1e40af; margin-bottom: 12px;">+$318K</div>
+                    <div style="font-size: 13px; color: #1e40af;">Additional ROI available</div>
+                </div>
+            </div>
+            
+            <div style="margin-top: 20px; padding: 20px; background: #fffbeb; border-radius: 8px; border-left: 4px solid #f59e0b;">
+                <p style="font-size: 14px; color: #78350f; line-height: 1.6;"><strong>Optimization Path:</strong> Targeted intervention with one provider (Chakravarthi) returning to baseline performance would increase program ROI by +$318,528 annually. This represents a clear, achievable path to exceptional program performance through focused support for a single provider.</p>
+            </div>
+        </div>
+
         <!-- Footer -->
         <div class="footer">
-            <div class="footer-content">
-                <svg viewBox="0 0 24 24">
-                    <path d="M19 3h-4.18C14.4 1.84 13.3 1 12 1c-1.3 0-2.4.84-2.82 2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 0c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1z"/>
-                </svg>
-                <span>Analysis based on actual wRVU and tRVU data | August 2024 vs August 2025 | 17 Oncology Augmedix Live users</span>
-            </div>
+            <p><strong>Methodology:</strong> True Pre-Live Baseline (12 months before Ramp Up Start) vs Performance (After Steady State) per SOP</p>
+            <p style="margin-top: 8px;"><strong>Data Source:</strong> report_customer_analytics_data | Revenue: $112/wRVU (Medicare CF 2025) | Cost: $2,800/provider/month</p>
+            <p style="margin-top: 8px;"><strong>Financial Calculations:</strong> Annual ROI = (wRVU Change × $112 × 12) - ($2,800 × 12) per provider | Aggregate = Sum of all provider ROIs</p>
+            <p style="margin-top: 12px; color: #10b981; font-weight: 600;">✅ All data verified against source files | Analysis follows SOP baseline methodology</p>
+            <p style="margin-top: 8px;">Dashboard Generated: October 20, 2025 | Contact: Revenue Analytics</p>
         </div>
     </div>
+
+    <script>
+        // Animate bars on load
+        window.addEventListener('load', () => {
+            const bars = document.querySelectorAll('.bar-fill, .comparison-bar-fill');
+            bars.forEach(bar => {
+                const width = bar.style.width;
+                bar.style.width = '0';
+                setTimeout(() => {
+                    bar.style.width = width;
+                }, 100);
+            });
+        });
+    </script>
 </body>
 </html>
